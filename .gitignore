@@ -12,6 +12,7 @@ public/datapack/
 data/
 *.hsrpack
 datapack-report.json
+update.json
 scripts/build.log
 .cache/
 

@@ -1,0 +1,98 @@
+name: Build datapack
+
+# 数据包自动构建：
+#  - 每天探测一次 nanoka 上游版本；只有出现新版本（或手动强制）才构建
+#  - 构建产物：hsr-local-{版本}.hsrpack + update.json，挂到 Release
+#  - 应用端更新检查读 releases/latest/download/update.json
+#
+# 注意：这是「数据包」流水线，不构建安装包；程序更新仍需另发 Release/安装包。
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "强制指定游戏版本（留空自动探测），例如 4.7.52"
+        required: false
+        default: ""
+      force:
+        description: "版本没变也重新构建（用于重打包）"
+        type: boolean
+        default: false
+  schedule:
+    # 每天 03:17 UTC（北京时间 11:17）
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: datapack-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resolve version and check release
+        id: meta
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_VERSION}" ]; then
+            VERSION="${INPUT_VERSION}"
+            echo "使用手动指定的版本：${VERSION}"
+          else
+            VERSION="$(node scripts/detect-upstream-version.mjs)"
+            echo "上游最新版本：${VERSION}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+          if [ "${INPUT_FORCE}" != "true" ] && gh release view "datapack-${VERSION}" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "数据包 ${VERSION} 已发布，跳过构建"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build datapack
+        if: steps.meta.outputs.skip == 'false'
+        env:
+          HSR_VERSION: ${{ steps.meta.outputs.version }}
+        run: npm run datapack:full
+
+      - name: Make update.json
+        if: steps.meta.outputs.skip == 'false'
+        env:
+          HSR_VERSION: ${{ steps.meta.outputs.version }}
+        run: npm run update:manifest
+
+      - name: Publish release
+        if: steps.meta.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          TAG="datapack-${VERSION}"
+          gh release create "$TAG" \
+            "hsr-local-${VERSION}.hsrpack" \
+            "update.json" \
+            --title "数据包 ${VERSION}" \
+            --notes "自动构建：游戏数据 ${VERSION}（来源 nanoka.cc）。应用内更新检查读取 update.json。" \
+            --latest
