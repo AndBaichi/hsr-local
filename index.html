@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>星穹铁道数据库</title>
+    <script>
+      // 仅深色主题：浅色 / 跟随系统已按用户要求移除，恒写 dark。
+      // 这是唯一允许在 index.html 里存在的脚本。
+      (function () {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.style.colorScheme = 'dark';
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

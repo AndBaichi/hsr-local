@@ -1,0 +1,21 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "最小权限集：只开核心能力与 asset 协议，不开 shell / fs / http（架构文档 §2.4）。opener:allow-open-url 带 scope 仅放行米游社文章域，供首页公告/资讯跳原文；调用侧 src/lib/openExternal.ts 另有前缀白名单，两层都要过。关窗/托盘走自定义命令（tray.rs），因此不需要 core:window:allow-hide / core:app:allow-exit",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-title",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-is-maximized",
+    "core:window:allow-close",
+    "dialog:default",
+    "opener:allow-open-path",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://www.miyoushe.com/*" }]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+/**
+ * 富文本排版样式（配合 src/components/common/RichText.tsx，T03 批次接入）
+ *
+ * 清洗管线输出的是**结构化节点树**而非 HTML 字符串（架构文档 §7），
+ * 因此这里只需要为节点类型提供类名，不涉及任何 `dangerouslySetInnerHTML`。
+ */
+
+.rt-root {
+  font-size: var(--hsr-fs-base);
+  line-height: var(--hsr-lh-loose);
+  color: var(--hsr-text);
+  word-break: break-word;
+}
+
+.rt-root p {
+  margin: 0 0 8px;
+}
+
+.rt-root p:last-child {
+  margin-bottom: 0;
+}
+
+.rt-b {
+  font-weight: 600;
+}
+
+.rt-i {
+  font-style: italic;
+}
+
+.rt-u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rt-s {
+  text-decoration: line-through;
+  color: var(--hsr-text-dim);
+}
+
+.rt-br {
+  display: block;
+  height: 6px;
+}
+
+/* 颜色标签 <color=#xxxxxx>：清洗管线会做 WCAG 提亮，这里直接消费计算后的值 */
+.rt-color {
+  color: inherit;
+}
+
+/* 日文注音 <ruby>：必须单独处理行高，否则行距会塌 */
+.rt-ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+.rt-ruby > rt {
+  font-size: 0.55em;
+  line-height: 1.1;
+  color: var(--hsr-text-dim);
+  letter-spacing: 0;
+}
+
+/* 术语 <term>：虚线下划 + 悬浮预览（T05 接入预览浮层） */
+.rt-term {
+  border-bottom: 1px dashed var(--hsr-accent-line);
+  cursor: help;
+}
+
+/* 百分比/倍率等数值 */
+.rt-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--hsr-accent);
+}
+
+/* 被管线判定为未知标签的残留文本：默认隐藏，DEV 下可见以便排障 */
+.rt-unknown {
+  display: none;
+}
+
+.rt-root[data-dev='true'] .rt-unknown {
+  display: inline;
+  outline: 1px dashed var(--hsr-danger);
+  color: var(--hsr-danger);
+}

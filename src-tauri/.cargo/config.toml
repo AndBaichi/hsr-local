@@ -1,0 +1,32 @@
+# GNU 工具链配置（架构文档 附录 B.2）
+#
+# ⚠️ 磁盘铁律：target-dir 必须在本项目的 C 盘目录内。
+#    D 盘是用户的 U 盘，严禁写入。这里用绝对路径而非相对路径，
+#    因为相对路径的解析基准是 .cargo 的父目录，容易出错。
+
+[build]
+target-dir = "C:/Users/26609/WorkBuddy/2026-11-15-06-45-01/hsr-local/src-tauri/target"
+
+[target.x86_64-pc-windows-gnu]
+linker = "C:/Users/26609/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin/gcc.exe"
+ar = "C:/Users/26609/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin/ar.exe"
+# dlltool 必须显式指定（附录 B 坑 #4）。
+#
+# `linker` / `ar` 钉死了路径还不够：`cargo build --release` 会在
+# `parking_lot_core` 处报
+#     error: error calling dlltool 'dlltool.exe': program not found
+# 因为 rustc 在 windows-gnu 下会调用 dlltool 生成导入库，而**它是按名字
+# 从 PATH 找的**，不吃上面的 linker 配置。
+#
+# 试过但不可行的方案：`[env] PATH = { value = "...", prepend = true }`
+# —— 本机 cargo 静默忽略 `prepend`（实测 build.rs 里读到的 PATH 完全没变），
+# 所以只能落在 rustflags 上。`-C dlltool=…` 是 stable 选项，已实测被接受。
+#
+# debug 之所以"看起来没事"，只是因为那批依赖已被编译过（有缓存），
+# 没再触发链接；清 target 或换机器后同样会炸。
+rustflags = ["-Cdlltool=C:/Users/26609/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin/dlltool.exe"]
+
+[env]
+# tauri-build / embed-resource 编译 Windows 资源（.rc）时需要 windres，
+# 这里显式暴露 MinGW 目录，供 build.rs 自行拼接可执行文件路径。
+MINGW_BIN = "C:/Users/26609/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin"

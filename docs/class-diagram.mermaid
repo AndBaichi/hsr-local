@@ -1,0 +1,202 @@
+%% 星穹数据库 · 本地版 — 类图
+%% 对应 docs/02-architecture.md §5
+classDiagram
+    direction LR
+
+    class DataAccessLayer {
+        <<interface>>
+        +meta: DataPackMeta
+        +bootInfo: BootInfo
+        +boot() Promise~BootInfo~
+        +rebind(info: BootInfo) void
+        +assetUrl(rel: string) string
+        +getIndex(module) Promise~Brief[]~
+        +getCharacter(id) Promise~CharacterDetail~
+        +getLightcone(id) Promise~LightconeDetail~
+        +getRelicSet(id) Promise~RelicSetDetail~
+        +getMonster(id) Promise~MonsterDetail~
+        +getItem(id) Promise~ItemDetail~
+        +getAchievements() Promise~AchievementBundle~
+        +getSearchIndex() Promise~SearchRecord[]~
+        +reportMissingAsset(rel: string) void
+    }
+
+    class DatapackLocator {
+        +source: DataPackSource
+        +rootUrl: string
+        +resolve(rel: string) string
+    }
+
+    class DetailCache {
+        -lru: Map~string, object~
+        +get(key: string) object
+        +set(key: string, val: object) void
+        +clear() void
+    }
+
+    class SearchEngine {
+        -records: SearchRecord[]
+        +load(records: SearchRecord[]) void
+        +query(q: string, opts: SearchOptions) SearchHit[]
+        +highlight(text: string, q: string) Segment[]
+    }
+
+    class RichTextPipeline {
+        +toRichNodes(raw: string, ctx: RichContext) RichResult
+        +flattenPlain(nodes: RtNode[]) string
+        +expandMacros(src: string, ctx: RichContext) string
+        +adjustColorForTheme(hex: string, theme: ThemeMode) string
+    }
+
+    class ParamResolver {
+        +formatParam(value: number, spec: string) string
+        +substitute(raw: string, paramList: number[]) SubstituteResult
+    }
+
+    class MonsterGrouper {
+        +group(briefs: MonsterBrief[]) MonsterGroup[]
+    }
+
+    class CompareMatrix {
+        +build(ids: string[], details: CharacterDetail[]) CompareRow[]
+        +diffFlags(rows: CompareRow[]) CompareRow[]
+    }
+
+    class EntityBrief {
+        <<abstract>>
+        +module: ModuleKey
+        +id: string
+        +name: LocalizedText
+        +rarity: Rarity
+        +icon: string
+    }
+
+    class CharacterBrief {
+        +element: ElementType
+        +path: PathType
+        +release: number
+        +version: string
+        +aliases: string[]
+    }
+    class LightconeBrief {
+        +path: PathType
+        +atkMax: number
+    }
+    class RelicSetBrief {
+        +kind: cavern|planar
+        +has4pc: boolean
+        +set2Summary: LocalizedText
+    }
+    class MonsterBrief {
+        +weak: ElementType[]
+        +groupKey: string
+        +variantIds: string[]
+        +variantLabels: Record~string, string~
+        +variantCount: number
+        +difficultyCount: number
+        +rankClass: string
+    }
+    class ItemBrief {
+        +mainType: ItemMainType
+        +subType: ItemSubType
+        +categoryKey: string
+        +hasDesc: boolean
+    }
+
+    class CharacterDetail {
+        +id: string
+        +i18n: Record~Lang, Text~
+        +charaInfo: CharaInfo
+        +ranks: RankEntry[]
+        +skills: SkillEntry[]
+        +skillTrees: SkillTreeBundle
+        +memosprite: MemospriteSection
+        +maxLevelStats: MaxStats
+        +relatedRelics: RelatedRelics
+        +relatedLightcones: string[]
+    }
+    class LightconeDetail {
+        +id: string
+        +refinement: Refinement
+        +maxLevelStats: MaxStats
+    }
+    class RelicSetDetail {
+        +id: string
+        +kind: cavern|planar
+        +effects: SetEffect[]
+        +parts: RelicPart[]
+    }
+    class MonsterDetail {
+        +id: string
+        +base: MonsterBase
+        +difficultyConfigs: DifficultyConfig[]
+        +drops: DropEntry[]
+    }
+    class ItemDetail {
+        +id: string
+        +desc: RichString
+        +bgDesc: RichString
+        +comefrom: ComefromEntry[]
+        +useMethod: UseMethod
+        +groupId: number
+        +pileLimit: number
+        +inventoryTag: number
+        +iconSource: string
+    }
+
+    class DataPackMeta {
+        +schemaVersion: number
+        +packId: string
+        +gameVersion: string
+        +builtAt: string
+        +languages: Lang[]
+        +counts: Record~string, number~
+        +contentHash: string
+    }
+
+    class UserDataStore {
+        +prefs: Prefs
+        +favorites: Map~EntityKey, FavoriteEntry~
+        +notes: Map~EntityKey, NoteEntry~
+        +recent: RecentEntry[]
+        +load() Promise~void~
+        +flush(name: string) Promise~void~
+    }
+    class FavoriteEntry {
+        +module: ModuleKey
+        +id: string
+        +nameSnapshot: LocalizedText
+        +packId: string
+        +addedAt: string
+        +group: string
+    }
+    class NoteEntry {
+        +module: ModuleKey
+        +id: string
+        +nameSnapshot: LocalizedText
+        +content: string
+        +updatedAt: string
+    }
+
+    DataAccessLayer --> DatapackLocator : resolves via
+    DataAccessLayer --> DetailCache : uses
+    DataAccessLayer --> SearchEngine : feeds
+    DataAccessLayer --> EntityBrief : returns
+    DataAccessLayer --> DataPackMeta : exposes
+    EntityBrief <|-- CharacterBrief
+    EntityBrief <|-- LightconeBrief
+    EntityBrief <|-- RelicSetBrief
+    EntityBrief <|-- MonsterBrief
+    EntityBrief <|-- ItemBrief
+    CharacterBrief ..> CharacterDetail : id
+    LightconeBrief ..> LightconeDetail : id
+    RelicSetBrief ..> RelicSetDetail : id
+    MonsterBrief ..> MonsterDetail : variantIds
+    ItemBrief ..> ItemDetail : id (shard % 16)
+    ItemBrief ..> ItemDetail : id
+    RichTextPipeline --> ParamResolver : uses
+    CompareMatrix --> CharacterDetail : reads
+    MonsterGrouper --> MonsterBrief : groups
+    UserDataStore --> FavoriteEntry : holds
+    UserDataStore --> NoteEntry : holds
+    UserDataStore ..> EntityBrief : keyed by module:id

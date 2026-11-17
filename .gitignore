@@ -1,0 +1,37 @@
+# 依赖与构建产物
+node_modules/
+dist/
+dist-ssr/
+
+# Tauri / Rust
+src-tauri/target/
+src-tauri/gen/
+
+# 数据包（80MB+，由 scripts/build-datapack.mjs 生成，不进版本库）
+public/datapack/
+data/
+*.hsrpack
+datapack-report.json
+scripts/build.log
+.cache/
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+.npm/
+*.local
+*.tmp
+*.bak
+
+# 编辑器 / 系统
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 本地归档里的旧安装包（80MB+，只留在本机；源码归档仍可提交）
+_attic/artifacts/
+
+# WorkBuddy 本地记忆/会话状态
+.workbuddy/

@@ -1,0 +1,154 @@
+%% 星穹数据库 · 本地版 — 关键流程时序图
+%% 对应 docs/02-architecture.md §6
+
+%% ============ ① 应用启动加载数据包 ============
+sequenceDiagram
+    autonumber
+    participant W as WebView (React)
+    participant T as Tauri Core
+    participant R as Rust commands
+    participant FS as 磁盘/资源目录
+    participant DAL as DataAccessLayer
+
+    W->>W: main.tsx 渲染 BootGuard 骨架屏（目标 ≤1s）
+    W->>T: invoke("datapack_boot")
+    T->>R: datapack_boot()
+    R->>FS: 读 $APPDATA/active.json
+    alt active.json 存在且目录有效
+        R->>FS: 读 packs/{packId}/meta.json
+        R-->>T: source="imported", rootUrl=asset://…/packs/{packId}/
+    else 不存在 / 目录被手删
+        R->>FS: 读 $RESOURCE/datapack/meta.json
+        R-->>T: source="builtin", rootUrl=asset://…/datapack/
+    end
+    T-->>W: BootInfo{source, rootUrl, meta, previousPackId, warnings}
+    W->>DAL: rebind(BootInfo)
+    par 并行预热 6 个索引
+        W->>DAL: getIndex('character')
+        DAL->>FS: fetch db/index/character.json
+        FS-->>DAL: JSON ≈120KB
+        DAL-->>W: CharacterBrief[]
+    and
+        W->>DAL: getIndex('monster') / 'item' / 'lightcone' / 'relicset' / 'achievement'
+        DAL-->>W: Brief[]
+    end
+    W->>DAL: getSearchIndex()
+    DAL->>FS: fetch db/search.json
+    FS-->>DAL: SearchRecord[] ≈1.6MB
+    DAL-->>W: 常驻内存
+    W->>W: 渲染首页（版本徽标 + 6 模块卡 + 最近浏览 + 收藏速览）
+    Note over W,FS: 全程 0 次外网请求；常驻内存 ≈8MB
+
+%% ============ ② 全局搜索 ============
+sequenceDiagram
+    autonumber
+    participant U as 用户
+    participant H as useHotkeys
+    participant O as SearchOverlay
+    participant S as SearchEngine
+    participant DAL as DataAccessLayer
+    participant RT as react-router
+
+    U->>H: Ctrl+K
+    H->>O: open()（Dialog 自动聚焦输入框）
+    U->>O: 输入「希儿」
+    O->>O: useDebouncedValue(120ms)
+    O->>S: query("希儿", {limitPerModule: 8})
+    S->>DAL: getSearchIndex()
+    alt 首次
+        DAL->>DAL: fetch + JSON.parse（4600 条）
+    else 已加载
+        DAL-->>S: 内存命中
+    end
+    DAL-->>S: SearchRecord[]
+    S->>S: normalize(query)：小写 / 全半角 / 去空格
+    S->>S: 逐条匹配 name.zh|en|ja|ko + aliases
+    S->>S: 打分：完全匹配100 / 前缀80 / 子串60 / 别名40
+    S-->>O: SearchHit[]（分模块分组 + highlight 段）
+    O->>O: 渲染分组列表与 mark 高亮
+    U->>O: ↑↓ 选择 + Enter
+    O->>RT: navigate("/characters/1001")
+    RT->>O: 路由变化 → close()
+
+%% ============ ③ 数据包导入与原子切换 ============
+sequenceDiagram
+    autonumber
+    participant U as 用户
+    participant ST as DatapackSection
+    participant DLG as dialog 插件
+    participant R as Rust datapack
+    participant FS as 磁盘
+    participant DAL as DataAccessLayer
+    participant DB as datapackStore
+
+    U->>ST: 点击「导入新数据包」
+    ST->>DLG: open({filters:[{name:"HSR 数据包", extensions:["hsrpack"]}]})
+    DLG-->>ST: /path/to/hsr-4.7.60.hsrpack
+    ST->>R: datapack_validate(path)
+    R->>FS: 打开 zip（校验 PK 魔数）
+    R->>R: 读 meta.json + manifest.json
+    R->>R: 校验 schemaVersion / 必需文件齐备 / 计数一致
+    R-->>ST: ValidationReport{ok, gameVersion, fileCount, bytes}
+    ST->>U: 确认框「当前 4.7.51 → 4.7.60，2618 文件 80MB」
+    U->>ST: 确认
+    ST->>R: datapack_import(path, channel)
+    R->>FS: 流式解压(64KB) → packs/{newId}.tmp/  [拒绝 .. 与绝对路径]
+    R-->>ST: ImportProgress{phase:"extract", done, total}
+    R->>FS: 逐文件 sha256 比对 manifest
+    R-->>ST: ImportProgress{phase:"verify", done, total}
+    alt 校验全部通过
+        R->>FS: rename(.tmp → {newId})
+        R->>FS: write active.json.tmp → fsync → rename(active.json)
+        R-->>ST: ImportResult{ok, boot}
+        ST->>DB: applyBoot(boot)
+        DB->>DAL: rebind(boot) + 清 index/detail/search/achievement 缓存
+        DB->>DB: 路由 remount（保持当前路径）
+        ST->>U: Snackbar「已切换到 4.7.60」
+        R->>FS: 异步删除最旧 pack 目录（保留 previous 供回滚）
+    else 任一步失败
+        R->>FS: remove_dir_all(.tmp)
+        R-->>ST: Err{code:"PACK_CORRUPT", detail:[失败文件…]}
+        ST->>U: 错误列表（可复制）；active.json 未改，原数据完好
+    end
+    Note over FS: 崩溃安全：任一步中断，active.json 始终指向一份完整数据
+
+%% ============ ④ 富文本清洗管线 ============
+sequenceDiagram
+    autonumber
+    participant C as 组件（技能/套装/星魂）
+    participant P as RichTextPipeline
+    participant N as normalize/stripUnbreak
+    participant PR as ParamResolver
+    participant M as MacroExpander
+    participant RB as RubyTokenizer
+    participant TG as TagTokenizer
+    participant RT as RichText 组件
+
+    C->>P: toRichNodes(raw, {lang, paramList, theme})
+    Note over P: raw = "治疗量提高<unbreak>#1[i]%</unbreak>。"
+    P->>N: step1 normalize + step2 stripUnbreak
+    N-->>P: "治疗量提高#1[i]%。"
+    P->>PR: step3 substitute(text, [0.1])
+    PR->>PR: spec="i%", v=0.1 → round(0.1*100)=10 → "10%"
+    PR-->>P: "治疗量提高10%。" + warnings=[]
+    P->>M: step4 expandMacros(text, ctx)
+    M->>M: {NICKNAME}→ctx.nickname / i18n.common.playerName
+    M->>M: {F#她}{M#他} 成对匹配 → 按 ctx.gender 取一侧（缺省 F）
+    M->>M: {TextID#…} / {TEXTJOIN#…} → "…" + warning（无文本表可查）
+    M-->>P: 纯文本（{} 残留 = 0）
+    P->>RB: step5 tokenizeRuby(text, lang)
+    alt lang === 'ja'
+        RB->>RB: {RUBY_B#みつき}三月{RUBY_E#}なのか → ruby(base:"三月", reading:"みつき") + text("なのか")
+    else 其他语言
+        RB->>RB: 剥离注音块，仅保留汉字 三月なのか
+    end
+    RB-->>P: RtNode[]
+    P->>TG: step6 tokenizeTags(nodes, theme)
+    TG->>TG: color=#hex 白名单（8位hex → 取前6位；对比度<3:1 → 提亮20%）
+    TG->>TG: b/i/u 映射；align="right" → align 节点；%s → term；未知标签 → unknown + warning
+    TG-->>P: RtNode[]
+    P->>P: step7 finalize：\n → br，合并相邻 text，丢弃空节点
+    P-->>C: RichResult{nodes, warnings}
+    C->>RT: <RichText nodes={nodes} />
+    RT->>RT: 纯 React 元素渲染（span/ruby/b/i/u/br/span[align]/term）
+    Note over RT: 无 dangerouslySetInnerHTML → 结构上免疫注入

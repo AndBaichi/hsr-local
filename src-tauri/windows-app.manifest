@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  应用清单（架构文档 附录 B Windows 段）
+
+  为什么需要自己写一份而不是用 tauri-build 的默认清单：
+  默认清单只有 `requestedExecutionLevel` + Common-Controls，**没有 DPI 感知声明**，
+  于是 125%/150% 缩放下 Windows 会把窗口按位图拉伸，中文字体糊成一片。
+  另外 GNU 工具链下 MinGW 还会自带一份 `default-manifest.o`，
+  两份"非默认清单"会让 ld 报 `.rsrc merge failure: multiple non-default manifests`；
+  显式提供这份清单后由 linker 直接采用，重复告警也一并消失。
+
+  `permonitorv2` 是 WebView2 官方推荐的模式：跨不同 DPI 的显示器拖动时重新布局而不是缩放。
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+    version="1.0.0.0"
+    processorArchitecture="*"
+    name="HSR.Local"
+    type="win32"
+  />
+  <description>星穹数据库 · 本地版</description>
+
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+        type="win32"
+        name="Microsoft.Windows.Common-Controls"
+        version="6.0.0.0"
+        processorArchitecture="*"
+        publicKeyToken="6595b64144ccf1df"
+        language="*"
+      />
+    </dependentAssembly>
+  </dependency>
+
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- Windows 10 / 11 -->
+      <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" />
+    </application>
+  </compatibility>
+
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">permonitorv2,permonitor</dpiAwareness>
+      <longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware>
+    </windowsSettings>
+  </application>
+</assembly>

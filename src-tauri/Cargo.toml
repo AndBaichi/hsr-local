@@ -1,0 +1,56 @@
+[package]
+name = "hsr-local"
+version = "4.7.51"
+description = "星穹数据库 · 本地版 —— 完全离线的崩坏：星穹铁道本地资料库"
+authors = ["HSR Local"]
+edition = "2021"
+rust-version = "1.77"
+# 现在有两个 bin 目标（`hsr-local` 主程序 + `selftest` 自检），
+# 必须显式声明谁是主程序，否则 `tauri build` 报
+# `failed to find main binary, make sure you have a package > default-run`。
+default-run = "hsr-local"
+
+[lib]
+name = "hsr_local_lib"
+# 只保留 rlib：桌面端 `main.rs` 通过 `hsr_local_lib::run()` 静态链接即可。
+# `staticlib` / `cdylib` 是 Tauri 模板为 iOS/Android 预留的，桌面端用不到；
+# 而 GNU ld 会为 cdylib 生成完整导出表，本 crate 的符号量会把序数顶到 99164，
+# 超出 PE 导出表 16 位上限（65535）→ `ld.exe: error: export ordinal too large: 99164`。
+# （MSVC 的 link.exe 用名字导出，不会触发此问题，属 GNU 工具链专属坑，见附录 B）
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# 核心：`protocol-asset` 用于 <img> 直读资源目录下的图片（架构文档 §1.3）
+# `tray-icon` 用于「收纳至托盘」：托盘常驻，关窗行为由前端决定（src-tauri/src/tray.rs）
+tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-window-state = "2"
+# dialog / opener 的 JS 侧调用在 T03 接入，这里先完成插件注册与权限声明
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+# 数据包（.hsrpack）读取：只需要 store/deflate，不要加密、bzip2、zstd 等一堆可选后端
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+# 没有 `[dev-dependencies]`：断言全部集中在 `src/selftest.rs`（`cargo run --bin selftest`），
+# 不用 libtest harness（在本工具链下起不来，见 README「已知限制」）。
+# 临时目录用 `selftest.rs` 自带的 30 行 `TempDir`，省掉一个只为测试存在的依赖。
+
+[[bin]]
+name = "selftest"
+path = "src/bin/selftest.rs"
+
+# 数据包（zip/sha2/walkdir/reqwest）等依赖在 T03 批次随 pack.rs 一并引入，
+# T01 只保留壳层必需项，避免首次构建时长与 dlltool 符号数（附录 B 坑 #4）风险。
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = "s"
+panic = "abort"
+strip = true

@@ -1,0 +1,109 @@
+/**
+ * 唯一颜色真源（架构文档 §2.2 约定 ②、§11.3）
+ *
+ * 规则：
+ *  - 应用里**不允许**出现任何硬编码色值（除本文件）。
+ *  - Tailwind 的 `colors` 与 MUI 的 `palette` 都映射到这里的 `var(--hsr-*)`。
+ *  - 仅深色主题（浅色 / 跟随系统已按用户要求移除），变量直接定义在 `:root`。
+ */
+
+:root {
+  /* ---- 字体栈（PRD §5.1，纯本地字体，不加载网络字体） ---- */
+  --hsr-font-sans: 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Inter', 'Segoe UI', system-ui,
+    -apple-system, 'Noto Sans CJK SC', 'Source Han Sans SC', sans-serif;
+  --hsr-font-mono: 'JetBrains Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
+
+  /* ---- 字号（最小正文 13px，表格 13px） ---- */
+  --hsr-fs-2xs: 10px;
+  --hsr-fs-xs: 11px;
+  --hsr-fs-sm: 12px;
+  --hsr-fs-base: 13px;
+  --hsr-fs-md: 14px;
+  --hsr-fs-lg: 16px;
+  --hsr-fs-xl: 20px;
+  --hsr-fs-2xl: 26px;
+  --hsr-fs-3xl: 32px;
+
+  /* ---- 行高 ---- */
+  --hsr-lh-tight: 1.3;
+  --hsr-lh-base: 1.6;
+  --hsr-lh-loose: 1.85;
+
+  /* ---- 圆角（PRD §5.1：卡片 12 / 按钮 8 / 标签 6） ---- */
+  --hsr-radius-card: 12px;
+  --hsr-radius-btn: 8px;
+  --hsr-radius-tag: 6px;
+
+  /* ---- 布局尺寸 ---- */
+  --hsr-nav-w: 240px;
+  --hsr-nav-w-collapsed: 64px;
+  --hsr-topbar-h: 40px;
+  --hsr-content-max: 1280px;
+  --hsr-content-px: 32px;
+
+  /* ---- 动效（仅状态反馈，120–180ms） ---- */
+  --hsr-dur-fast: 120ms;
+  --hsr-dur-base: 180ms;
+  --hsr-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---- 稀有度色标（PRD §5.1：5★ 金→紫渐变，4★ 紫，3★ 蓝） ---- */
+  --hsr-rarity-5-from: #f2c14e;
+  --hsr-rarity-5-to: #a78bfa;
+  --hsr-rarity-4: #a78bfa;
+  --hsr-rarity-3: #5aa9e6;
+
+  /* ---- 货币战争评级色（C 灰 / B 白 / A 绿 / S 紫 / SS 金 / SSS 红） ----
+   * 与稀有度色标分开定义：评级是用户自评，不是数据包里的稀有度，
+   * 共用变量会在将来调稀有度配色时互相牵连。
+   * B 档用偏冷的白而不是纯 #fff：深色底上纯白太扎眼，与正文 --hsr-text 区分开。 */
+  --hsr-rating-c: #9aa0a6;
+  --hsr-rating-b: #e6e8ee;
+  --hsr-rating-a: #4ade80;
+  --hsr-rating-s: #a78bfa;
+  --hsr-rating-ss: #f2c14e;
+  --hsr-rating-sss: #ff4d4f;
+}
+
+/* ==================== 深色（唯一主题，1:1 对齐原站紫色系） ==================== */
+:root {
+  color-scheme: dark;
+
+  --hsr-bg: #080510;
+  --hsr-panel: #120d22;
+  --hsr-elev: #1b1431;
+  --hsr-line: #2d2248;
+  --hsr-text: #f8fafc;
+  --hsr-text-dim: #94a3b8;
+  --hsr-accent: #b892ff;
+  --hsr-accent2: #ff79cf;
+  --hsr-gold: #f2c14e;
+  --hsr-danger: #fb7185;
+
+  /* 派生色：不新增调色板，只做透明度层次 */
+  --hsr-accent-soft: rgba(184, 146, 255, 0.12);
+  --hsr-accent-line: rgba(184, 146, 255, 0.32);
+  --hsr-danger-soft: rgba(251, 113, 133, 0.14);
+  --hsr-overlay: rgba(8, 5, 16, 0.72);
+  --hsr-hover: rgba(255, 255, 255, 0.05);
+  --hsr-active: rgba(184, 146, 255, 0.1);
+  --hsr-scrollbar: rgba(184, 146, 255, 0.38);
+  --hsr-scrollbar-hover: rgba(184, 146, 255, 0.62);
+  /* 深色下用内高光 + 描边替代投影 */
+  --hsr-shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  --hsr-shadow-overlay: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --hsr-grid-line: rgba(184, 146, 255, 0.04);
+
+  /* 本地便签（v2.15）：半透明底 + 同色描边。
+     不新增纯色块 —— 深色主题里高饱和不透明底会盖过正文，只做"带颜色的纸"。
+     五色与评级/稀有度色标分开命名，将来调色互不牵连。 */
+  --hsr-note-amber: rgba(242, 193, 78, 0.16);
+  --hsr-note-amber-line: rgba(242, 193, 78, 0.34);
+  --hsr-note-rose: rgba(251, 113, 133, 0.16);
+  --hsr-note-rose-line: rgba(251, 113, 133, 0.34);
+  --hsr-note-mint: rgba(74, 222, 128, 0.16);
+  --hsr-note-mint-line: rgba(74, 222, 128, 0.34);
+  --hsr-note-sky: rgba(96, 165, 250, 0.16);
+  --hsr-note-sky-line: rgba(96, 165, 250, 0.34);
+  --hsr-note-violet: rgba(184, 146, 255, 0.18);
+  --hsr-note-violet-line: rgba(184, 146, 255, 0.36);
+}

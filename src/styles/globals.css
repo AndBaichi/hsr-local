@@ -1,0 +1,294 @@
+/**
+ * 全局重置与基础排版。
+ *
+ * ⚠️ Tailwind 的 preflight 已关闭（架构文档 §2.2 约定 ①），
+ * 所以浏览器默认样式必须在这里自己收干净，否则 MUI 与 Tailwind 会各自为政。
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html {
+  /* 主题切换是 0ms 的 data-theme 属性替换，这里不做 color transition 以免闪烁 */
+  background-color: var(--hsr-bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--hsr-bg);
+  color: var(--hsr-text);
+  font-family: var(--hsr-font-sans);
+  font-size: var(--hsr-fs-base);
+  line-height: var(--hsr-lh-base);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: var(--hsr-lh-tight);
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--hsr-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/**
+ * `<button>` 的浏览器默认外观清除。
+ *
+ * ⚠️ 必须用 `:where()` 包一层：它把特异性降到 0，
+ * 因此不会覆盖任何 Tailwind 背景/边框工具类（如 `bg-elev`、`border-line`），
+ * 只清除 UA 默认的 `buttonface` 灰底与 3D 边框。
+ * （Tailwind preflight 已关闭，若不清理，纯图标按钮会露出灰白方块。）
+ */
+:where(button) {
+  background-color: transparent;
+  background-image: none;
+  border: 0;
+}
+
+/* 数值一律等宽数字（PRD §5.1） */
+.hsr-num,
+table,
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 选区 ---------- */
+::selection {
+  background: var(--hsr-accent-soft);
+  color: var(--hsr-text);
+}
+
+/* ---------- 滚动条 ---------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hsr-scrollbar) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--hsr-scrollbar);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--hsr-scrollbar-hover);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ---------- 对比卡片区滚动条（v2.14） ---------- */
+/*
+ * 对比页卡片多时，这一条横向滚动条是唯一的翻页入口，颜色比全局细滚动条
+ * 亮一档（accent 32% → hover 实色），免得在黑底上找不到。
+ */
+.hsr-compare-scroll {
+  scrollbar-color: var(--hsr-accent-line) transparent;
+}
+
+.hsr-compare-scroll::-webkit-scrollbar {
+  height: 12px;
+}
+
+.hsr-compare-scroll::-webkit-scrollbar-thumb {
+  background-color: var(--hsr-accent-line);
+  background-clip: padding-box;
+}
+
+.hsr-compare-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--hsr-accent);
+  background-clip: padding-box;
+}
+
+/* ---------- 银狼鼠标指针主题（v2.16） ---------- */
+/*
+ * 变量由 src/lib/cursorTheme.ts 写入（值形如 `url("...") x y, fallback`），
+ * 这里只管「什么元素用什么指针」。`cursor` 是继承属性，所以根节点设一次即可，
+ * 只有 UA 样式或工具类显式改过指针的元素需要单独覆盖。
+ *
+ * 指针图是 32×32 静态 PNG（原 .ani 首帧），想给某块区域换语义指针时写
+ * `data-cursor="move|we|ns|nwse|nesw|cross|busy|working"`。
+ */
+html[data-cursor-theme='silverwolf'] {
+  cursor: var(--hsr-cursor-arrow);
+}
+
+html[data-cursor-theme='silverwolf'] a,
+html[data-cursor-theme='silverwolf'] button:not(:disabled),
+html[data-cursor-theme='silverwolf'] [role='button']:not([aria-disabled='true']),
+html[data-cursor-theme='silverwolf'] select:not(:disabled),
+html[data-cursor-theme='silverwolf'] summary,
+html[data-cursor-theme='silverwolf'] label[for],
+html[data-cursor-theme='silverwolf'] .cursor-pointer {
+  cursor: var(--hsr-cursor-link);
+}
+
+html[data-cursor-theme='silverwolf'] input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']):not([type='file']):not(:disabled),
+html[data-cursor-theme='silverwolf'] textarea:not(:disabled),
+html[data-cursor-theme='silverwolf'] [contenteditable='true'],
+html[data-cursor-theme='silverwolf'] .cursor-text {
+  cursor: var(--hsr-cursor-beam);
+}
+
+html[data-cursor-theme='silverwolf'] :disabled,
+html[data-cursor-theme='silverwolf'] [aria-disabled='true'],
+html[data-cursor-theme='silverwolf'] .cursor-not-allowed {
+  cursor: var(--hsr-cursor-no);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='move'] {
+  cursor: var(--hsr-cursor-move);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='cross'] {
+  cursor: var(--hsr-cursor-cross);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='ns'] {
+  cursor: var(--hsr-cursor-ns);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='we'] {
+  cursor: var(--hsr-cursor-we);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='nwse'] {
+  cursor: var(--hsr-cursor-nwse);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='nesw'] {
+  cursor: var(--hsr-cursor-nesw);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='busy'] {
+  cursor: var(--hsr-cursor-busy);
+}
+
+html[data-cursor-theme='silverwolf'] [data-cursor='working'],
+html[data-cursor-theme='silverwolf'] [aria-busy='true'] {
+  cursor: var(--hsr-cursor-working);
+}
+
+/* ---------- 键盘可达性（PRD §7.6 / S4 无障碍） ---------- */
+:focus-visible {
+  outline: 2px solid var(--hsr-accent);
+  outline-offset: 2px;
+  border-radius: var(--hsr-radius-btn);
+}
+
+/* ---------- 应用骨架的通用工具类 ---------- */
+@layer components {
+  .hsr-content-width {
+    width: 100%;
+    max-width: var(--hsr-content-max);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--hsr-content-px);
+    padding-right: var(--hsr-content-px);
+  }
+
+  /* 深空底纹：纯 CSS 渐变，不使用任何官方美术素材（PRD §5.1） */
+  .hsr-backdrop {
+    background-image: radial-gradient(
+        1200px 480px at 12% -10%,
+        var(--hsr-accent-soft),
+        transparent 70%
+      ),
+      radial-gradient(900px 420px at 88% 0%, var(--hsr-accent-soft), transparent 72%),
+      linear-gradient(var(--hsr-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--hsr-grid-line) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  }
+
+  .hsr-panel {
+    background-color: var(--hsr-panel);
+    border: 1px solid var(--hsr-line);
+    border-radius: var(--hsr-radius-card);
+    box-shadow: var(--hsr-shadow-panel);
+  }
+}
+
+/* 屏幕阅读器专用文本 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
