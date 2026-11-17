@@ -197,8 +197,18 @@ async function main() {
   // 星魂、前后排技能、三档属性、推荐光锥全在**单条文件**里：
   // `{STATIC}/{lang}/currency/role/{id}.json`（实测 1006 为 60 KB）。
   // 不抓这一层，详情页就只能把 id 列表摊开显示，等于没有详情。
+  //
+  // 注意：汇总文件本身也在上面第 3 步的 tasks 里，但那是「稍后才下载」；这里要
+  // **先拿到 id 列表**，所以本地没有就直接从源站读一次（CI 首次构建就是这种情况）。
   try {
-    const raw = JSON.parse(await readFile(join(OUT, 'db/zh/currency/role.json'), 'utf8'));
+    let raw;
+    try {
+      raw = JSON.parse(await readFile(join(OUT, 'db/zh/currency/role.json'), 'utf8'));
+    } catch {
+      const response = await fetch(`${STATIC}/zh/currency/role.json`, { headers: { 'User-Agent': UA } });
+      if (!response.ok) throw new Error(`role.json 读取失败：HTTP ${response.status}`);
+      raw = await response.json();
+    }
     const rows = Array.isArray(raw) ? raw : Object.values(raw);
     const roleIds = rows.map((row) => String(row?.id ?? '')).filter((id) => id !== '');
     for (const lang of LANGS) {

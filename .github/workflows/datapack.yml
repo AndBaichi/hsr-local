@@ -90,6 +90,10 @@ jobs:
         run: |
           set -euo pipefail
           TAG="datapack-${VERSION}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "删除已存在的 Release ${TAG}（强制重建）"
+            gh release delete "$TAG" --yes --cleanup-tag
+          fi
           gh release create "$TAG" \
             "hsr-local-${VERSION}.hsrpack" \
             "update.json" \
