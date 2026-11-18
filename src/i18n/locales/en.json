@@ -170,7 +170,29 @@
     "cursorTheme": "Mouse cursor",
     "cursorThemeDesc": "Cursor style inside the app (bundled Silver Wolf theme; switch back to system anytime)",
     "cursorSilverWolf": "Silver Wolf theme",
-    "cursorSystem": "System default"
+    "cursorSystem": "System default",
+    "update": "Data pack update",
+    "updateDesc": "Check GitHub Releases for a newer data pack. Downloads are verified with sha256; if anything fails, the current pack stays active.",
+    "currentVersion": "Current version",
+    "latestVersion": "Latest version",
+    "checkUpdate": "Check for updates",
+    "checkingUpdate": "Checking…",
+    "upToDate": "You're up to date",
+    "notChecked": "Not checked yet",
+    "updateAvailable": "New version {{version}} available",
+    "downloadUpdate": "Download & install",
+    "downloadingUpdate": "Downloading… {{percent}}%",
+    "installingUpdate": "Installing…",
+    "updateReady": "Data pack {{version}} installed. Restart the app to apply.",
+    "restartApp": "Restart app",
+    "autoUpdate": "Auto-download updates",
+    "autoUpdateHint": "When enabled, new versions are downloaded automatically at startup; you'll still confirm the restart.",
+    "importPack": "Import .hsrpack",
+    "rollbackPack": "Roll back to previous",
+    "updateError": "Update failed: {{message}}",
+    "appOutdated": "This pack needs a newer app ({{version}} or later).",
+    "updateNotes": "Release notes",
+    "noPrevious": "No previous version to roll back to"
   },
   "closePrompt": {
     "title": "Close window",
@@ -563,5 +585,10 @@
     "localEmptyDesc": "Create a note for quick thoughts, or collect images and files like a folder.",
     "uploadFailed": "Action failed, please try again",
     "color": "Note color"
+  },
+  "update": {
+    "banner": "Data pack {{version}} is available",
+    "go": "Update",
+    "dismiss": "Dismiss"
   }
 }

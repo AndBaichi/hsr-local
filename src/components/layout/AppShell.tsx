@@ -13,7 +13,9 @@ import { Outlet } from 'react-router-dom';
 import { ContextMenuHost, installContextMenuSuppression } from '@/components/common/ContextMenu';
 import { SideNav } from '@/components/layout/SideNav';
 import { TopBar } from '@/components/layout/TopBar';
+import { UpdateBanner } from '@/components/layout/UpdateBanner';
 import { useSettingsStore } from '@/stores/settings';
+import { useUpdaterStore } from '@/stores/updater';
 import { LAYOUT } from '@/theme/tokens';
 
 /** 窄窗口媒体查询：`max-width: (breakpoint - 1)px` */
@@ -55,6 +57,15 @@ export function AppShell(): ReactNode {
   // 卡片上的自定义菜单由 EntityCard / 成就系列头各自触发
   useEffect(() => installContextMenuSuppression(), []);
 
+  // v4.8：启动后延迟 10 秒做一次静默更新检查（24h 节流在 store 里）。
+  // 延迟是为了不和首屏索引加载抢网络/CPU，也让「刚打开就弹更新」显得突兀。
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void useUpdaterStore.getState().check(false);
+    }, 10_000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-base text-ink">
       <SideNav
@@ -67,6 +78,7 @@ export function AppShell(): ReactNode {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
+        <UpdateBanner />
 
         <main className="hsr-backdrop min-h-0 flex-1 overflow-y-auto">
           <div className="hsr-content-width py-6">

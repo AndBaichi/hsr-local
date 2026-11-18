@@ -71,6 +71,12 @@ pub struct PackPointer {
     /// 展开时那份 `.hsrpack` 的条目数（内容指纹的另一半）
     #[serde(rename = "entryCount", default)]
     pub entry_count: u64,
+    /// 来源：`builtin`（安装包自带展开）/ `update`（客户端下载或手动导入）
+    ///
+    /// 老指针没有这个字段（空串）。启动时据此决定要不要用内置压缩包重新展开：
+    /// `update` 的包不能因为内置包是旧版就被覆盖。
+    #[serde(default, rename = "source")]
+    pub source: String,
 }
 
 impl Default for PackPointer {
@@ -83,6 +89,7 @@ impl Default for PackPointer {
             installed_at: 0,
             archive_bytes: 0,
             entry_count: 0,
+            source: String::new(),
         }
     }
 }
@@ -244,6 +251,13 @@ impl PackState {
             *guard = status;
         }
     }
+
+    /// 客户端更新 / 回滚切换指针后，把内存状态同步成新的 `Ready`。
+    ///
+    /// 前端会紧接着 `location.reload()`；重载后 `pack_status` 读到的就是新包。
+    pub fn activate(&self, pointer: &PackPointer) {
+        self.set(pointer_to_status(pointer));
+    }
 }
 
 /// 把指针内容转成 `Ready`
@@ -340,11 +354,8 @@ pub(crate) fn read_meta(root: &Path) -> Result<PackMeta, AppError> {
             SUPPORTED_SCHEMA_VERSION,
         ));
     }
-    if let Some(mismatch) = counts_mismatch(&meta.counts) {
-        return Err(AppError::pack_corrupt(format!(
-            "数据包内容不完整：{mismatch}"
-        )));
-    }
+    // 计数校验只对「安装包自带」的 4.7.51 内置包做：外部更新的包计数一定随版本变化，
+    // 由 manifest 的 sha256 保证完整性，不能再用编译期常量卡它（否则 4.7.52 装不上）。
     Ok(meta)
 }
 
@@ -407,6 +418,69 @@ fn pointer_matches_archive<R: Runtime>(app: &AppHandle<R>, pointer: &PackPointer
         return false;
     }
     pointer.archive_bytes == bytes && pointer.entry_count == entries
+}
+
+/// 直接读压缩包里的 `meta.json`（不解包任何数据文件）。
+///
+/// 客户端更新时用它在下载/安装前做一次「这个包是给哪个版本/schema 的」预检；
+/// 启动时也用它比较「内置包」与「当前生效包」谁的版本更新。
+pub(crate) fn read_archive_meta(archive: &Path) -> Result<PackMeta, AppError> {
+    let file = fs::File::open(archive)
+        .map_err(|error| AppError::pack_not_found(archive.display()).with_detail(error.to_string()))?;
+    let mut zip = zip::ZipArchive::new(BufReader::new(file))
+        .map_err(|error| AppError::pack_corrupt(format!("打开 zip 失败: {error}")))?;
+    let mut entry = zip
+        .by_name("meta.json")
+        .map_err(|error| AppError::pack_corrupt(format!("包内缺少 meta.json: {error}")))?;
+    let mut text = String::new();
+    entry
+        .read_to_string(&mut text)
+        .map_err(|error| AppError::pack_corrupt(format!("读取 meta.json 失败: {error}")))?;
+    serde_json::from_str(&text).map_err(|error| AppError::pack_corrupt(format!("meta.json 解析失败: {error}")))
+}
+
+/// 比较 `a.b.c` 形式的版本号：`left` 是否严格高于 `right`。
+///
+/// 只做数字段比较；非数字段按 0 处理。游戏版本永远是纯数字段，够用。
+fn version_gt(left: &str, right: &str) -> bool {
+    let split = |value: &str| -> Vec<u64> {
+        value
+            .split('.')
+            .map(|segment| segment.parse::<u64>().unwrap_or(0))
+            .collect()
+    };
+    let left_parts = split(left);
+    let right_parts = split(right);
+    let length = left_parts.len().max(right_parts.len());
+    for index in 0..length {
+        let a = left_parts.get(index).copied().unwrap_or(0);
+        let b = right_parts.get(index).copied().unwrap_or(0);
+        if a != b {
+            return a > b;
+        }
+    }
+    false
+}
+
+/// 启动时判断「当前指针还能不能继续用」。
+///
+/// - `builtin` / 老指针：沿用原逻辑，内置压缩包字节数/条目数变了就重解；
+/// - `update`：不能被**旧版**内置包覆盖；只有安装包里的内置数据版本更高
+///   （用户重装/升级了程序）时才重新展开内置包。
+fn should_keep_pointer<R: Runtime>(app: &AppHandle<R>, pointer: &PackPointer) -> bool {
+    if matches!(pointer.source.as_str(), "update" | "manual") {
+        let Ok(archive) = locate_archive(app) else {
+            return true;
+        };
+        let Ok(meta) = read_archive_meta(&archive) else {
+            return true;
+        };
+        if meta.schema_version != SUPPORTED_SCHEMA_VERSION {
+            return true;
+        }
+        return !version_gt(&meta.game_version, &pointer.game_version);
+    }
+    pointer_matches_archive(app, pointer)
 }
 
 /// 依次尝试可能存放 `.hsrpack` 的位置，返回第一个存在的。
@@ -493,7 +567,7 @@ pub(crate) fn sanitize_entry_path(name: &str) -> Result<PathBuf, AppError> {
 /// 把 `.hsrpack` 解到 `staging` 目录，返回写入的文件数。
 ///
 /// 只支持 store / deflate（T02 的 `pack.mjs` 就是这么写的），不支持加密与 zip64。
-fn extract_archive<F>(archive: &Path, staging: &Path, mut on_progress: F) -> Result<usize, AppError>
+pub(crate) fn extract_archive<F>(archive: &Path, staging: &Path, mut on_progress: F) -> Result<usize, AppError>
 where
     F: FnMut(usize, usize),
 {
@@ -541,6 +615,62 @@ where
     Ok(written)
 }
 
+/// 启动时清理不再被「当前 / 上一版 / 内置」引用的旧数据包目录。
+///
+/// 每次客户端更新都会产生一个 `packs/{packId}-{时间戳}` 的完整副本（约 160 MB）；
+/// 只保留三份（active、previous、builtin）就够回滚与兜底，其余在下次启动时删掉。
+/// 失败只忽略：清理是优化，不能阻断启动。
+fn cleanup_old_packs<R: Runtime>(app: &AppHandle<R>, active: &PackPointer) {
+    let Ok(packs_dir) = paths::packs_dir(app) else {
+        return;
+    };
+    let Ok(entries) = fs::read_dir(&packs_dir) else {
+        return;
+    };
+
+    let mut keep: Vec<PathBuf> = vec![PathBuf::from(&active.root)];
+    if let Ok(builtin_dir) = paths::pack_dir(app, BUILTIN_PACK_ID) {
+        keep.push(builtin_dir);
+    }
+    if let Ok(previous_path) = paths::previous_pointer_path(app) {
+        if let Ok(previous) = read_json_or_default::<PackPointer>(&previous_path) {
+            if !previous.root.is_empty() {
+                keep.push(PathBuf::from(&previous.root));
+            }
+        }
+    }
+
+    // 上次下载被打断留下的临时包：启动时不可能还有下载在跑，直接清掉
+    if let Ok(update_dir) = paths::update_dir(app) {
+        if let Ok(files) = fs::read_dir(&update_dir) {
+            for file in files.flatten() {
+                if file.path().is_file() {
+                    let _ = fs::remove_file(file.path());
+                }
+            }
+        }
+    }
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.starts_with(".staging-") {
+            let _ = fs::remove_dir_all(&path);
+            continue;
+        }
+        if !name.starts_with("hsr-") {
+            continue;
+        }
+        if keep.iter().any(|kept| kept == &path) {
+            continue;
+        }
+        let _ = fs::remove_dir_all(&path);
+    }
+}
+
 /// 清掉可能残留的 staging 目录（上次解包被杀）
 fn reset_staging(staging: &Path) -> Result<(), AppError> {
     if staging.exists() {
@@ -561,6 +691,14 @@ pub fn ensure_builtin_pack<R: Runtime>(app: &AppHandle<R>) -> Result<PackPointer
     ensure_builtin_pack_with_progress(app, |_done, _total| {})
 }
 
+/// 读取当前生效指针（客户端更新/回滚用，要求指针有效）。
+///
+/// # Errors
+/// 指针缺失、指向的目录/`meta.json` 无效时返回 `AppError`
+pub fn active_pointer<R: Runtime>(app: &AppHandle<R>) -> Result<PackPointer, AppError> {
+    try_existing_pointer(app)
+}
+
 /// 同 [`ensure_builtin_pack`]，但解包过程中回报进度（`on_progress(已写, 总数)`）。
 ///
 /// # Errors
@@ -576,10 +714,10 @@ where
     //    只比 `packId` 不够 —— 数据包内容变了但 id 与游戏版本没变时，
     //    会继续复用旧解包目录（详见 `pointer_matches_archive` 的注释）。
     if let Ok(pointer) = try_existing_pointer(app) {
-        if pointer_matches_archive(app, &pointer) {
+        if should_keep_pointer(app, &pointer) {
             return Ok(pointer);
         }
-        eprintln!("[hsr] 检测到数据包内容已更新，重新展开");
+        eprintln!("[hsr] 内置数据包比当前生效包更新，重新展开");
     }
 
     // 2. 解包；失败则回落到散装目录
@@ -614,6 +752,7 @@ fn resource_datapack_fallback<R: Runtime>(app: &AppHandle<R>) -> Option<PackPoin
         // 下次启动若发现压缩包存在会再次尝试展开（这条兜底路径本来就意味着上次解包失败了）
         archive_bytes: 0,
         entry_count: 0,
+        source: "builtin".to_string(),
     };
     // 指针写失败不影响本次使用（下次启动会再走一遍解包尝试）
     let _ = write_json_atomic(&paths::active_pointer_path(app).ok()?, &pointer);
@@ -646,6 +785,11 @@ where
 
     // 4. 校验产物（这一步在 rename 之前，失败只会留下 .tmp）
     let meta = read_meta(&staging)?;
+    if let Some(mismatch) = counts_mismatch(&meta.counts) {
+        return Err(AppError::pack_corrupt(format!(
+            "数据包内容不完整：{mismatch}"
+        )));
+    }
     if meta.pack_id != BUILTIN_PACK_ID {
         return Err(AppError::pack_corrupt(format!(
             "数据包 id 不匹配：{} != {BUILTIN_PACK_ID}",
@@ -671,6 +815,7 @@ where
         installed_at: now_secs(),
         archive_bytes,
         entry_count,
+        source: "builtin".to_string(),
     };
     write_json_atomic(&paths::active_pointer_path(app)?, &pointer)?;
 
@@ -712,6 +857,7 @@ pub fn prepare_in_background<R: Runtime>(app: AppHandle<R>, awareness: DpiAwaren
 
     match result {
         Ok(pointer) => {
+            cleanup_old_packs(&app, &pointer);
             state.set(pointer_to_status(&pointer));
             announce_ready(&app, &pointer.root, awareness);
         }

@@ -170,7 +170,29 @@
     "cursorTheme": "マウスカーソル",
     "cursorThemeDesc": "アプリ内のカーソルスタイル（銀狼テーマを内置。いつでもシステムに戻せます）",
     "cursorSilverWolf": "銀狼テーマ",
-    "cursorSystem": "システム既定"
+    "cursorSystem": "システム既定",
+    "update": "データパック更新",
+    "updateDesc": "GitHub Releases から新しいデータパックを確認・インストールします。ダウンロードは sha256 で検証し、失敗時は現在のパックを維持します。",
+    "currentVersion": "現在のバージョン",
+    "latestVersion": "最新バージョン",
+    "checkUpdate": "更新を確認",
+    "checkingUpdate": "確認中…",
+    "upToDate": "最新です",
+    "notChecked": "未確認",
+    "updateAvailable": "新しいバージョン {{version}} があります",
+    "downloadUpdate": "ダウンロードしてインストール",
+    "downloadingUpdate": "ダウンロード中… {{percent}}%",
+    "installingUpdate": "インストール中…",
+    "updateReady": "データパック {{version}} をインストールしました。再起動で反映されます。",
+    "restartApp": "アプリを再起動",
+    "autoUpdate": "更新を自動ダウンロード",
+    "autoUpdateHint": "有効にすると起動時に新しいバージョンを自動でダウンロードし、再起動を確認します。",
+    "importPack": ".hsrpack を手動で導入",
+    "rollbackPack": "前のバージョンに戻す",
+    "updateError": "更新に失敗しました：{{message}}",
+    "appOutdated": "このデータパックには新しいアプリ（{{version}} 以降）が必要です。",
+    "updateNotes": "更新内容",
+    "noPrevious": "戻せる前のバージョンがありません"
   },
   "closePrompt": {
     "title": "ウィンドウを閉じる",
@@ -563,5 +585,10 @@
     "localEmptyDesc": "付箋を作成して、思いつきや画像・ファイルをまとめておけます。",
     "uploadFailed": "操作に失敗しました。もう一度お試しください",
     "color": "付箋の色"
+  },
+  "update": {
+    "banner": "データパック {{version}} が利用可能です",
+    "go": "更新する",
+    "dismiss": "無視"
   }
 }

@@ -64,6 +64,8 @@ export interface Prefs {
   closeAction: CloseAction;
   /** 鼠标指针主题（v2.16：内置银狼指针，可切回系统） */
   cursorTheme: CursorTheme;
+  /** 发现新数据包时是否自动下载（v4.8；默认只提示，不偷跑流量） */
+  autoUpdate: boolean;
 }
 
 /** 默认偏好 */
@@ -77,6 +79,7 @@ export const DEFAULT_PREFS: Readonly<Prefs> = {
   compareIds: [],
   closeAction: 'ask',
   cursorTheme: DEFAULT_CURSOR_THEME,
+  autoUpdate: false,
 };
 
 /** 列表每页条数的合法范围 */
@@ -176,6 +179,9 @@ function coercePrefs(raw: unknown): Prefs {
       ? source.cursorTheme
       : DEFAULT_PREFS.cursorTheme;
 
+  const autoUpdate =
+    typeof source.autoUpdate === 'boolean' ? source.autoUpdate : DEFAULT_PREFS.autoUpdate;
+
   return {
     schemaVersion: PREFS_SCHEMA_VERSION,
     themeMode,
@@ -186,6 +192,7 @@ function coercePrefs(raw: unknown): Prefs {
     compareIds,
     closeAction,
     cursorTheme,
+    autoUpdate,
   };
 }
 
@@ -276,6 +283,8 @@ export interface SettingsState {
   setCloseAction: (action: CloseAction) => void;
   /** 设置鼠标指针主题（v2.16） */
   setCursorTheme: (theme: CursorTheme) => void;
+  /** 开关「自动下载数据包更新」（v4.8） */
+  setAutoUpdate: (enabled: boolean) => void;
   /** 恢复默认偏好 */
   resetPrefs: () => void;
 }
@@ -338,6 +347,10 @@ export const useSettingsStore = create<SettingsState>()((set, get) => ({
     // 先应用再落盘：指针是即时反馈，不该等 300ms 防抖
     applyCursorTheme(theme);
     set({ prefs: commit({ ...get().prefs, cursorTheme: theme }) });
+  },
+
+  setAutoUpdate: (enabled) => {
+    set({ prefs: commit({ ...get().prefs, autoUpdate: enabled }) });
   },
 
   resetPrefs: () => {

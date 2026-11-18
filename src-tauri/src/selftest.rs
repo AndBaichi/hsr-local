@@ -792,6 +792,7 @@ fn pack_pointer_roundtrip() {
         installed_at: 42,
         archive_bytes: 77_000_000,
         entry_count: 7359,
+        source: "builtin".to_string(),
     };
     write_json_atomic(&path, &pointer).expect("写入失败");
     let loaded: PackPointer = read_json_or_default(&path).expect("读取失败");

@@ -170,7 +170,29 @@
     "cursorTheme": "마우스 커서",
     "cursorThemeDesc": "앱 내부 커서 스타일(은랑 테마 내장, 언제든 시스템으로 전환)",
     "cursorSilverWolf": "은랑 테마",
-    "cursorSystem": "시스템 기본"
+    "cursorSystem": "시스템 기본",
+    "update": "데이터 팩 업데이트",
+    "updateDesc": "GitHub Releases에서 새 데이터 팩을 확인하고 설치합니다. 다운로드는 sha256으로 검증하며, 실패하면 현재 팩을 유지합니다.",
+    "currentVersion": "현재 버전",
+    "latestVersion": "최신 버전",
+    "checkUpdate": "업데이트 확인",
+    "checkingUpdate": "확인 중…",
+    "upToDate": "최신 상태입니다",
+    "notChecked": "아직 확인하지 않음",
+    "updateAvailable": "새 버전 {{version}} 사용 가능",
+    "downloadUpdate": "다운로드 및 설치",
+    "downloadingUpdate": "다운로드 중… {{percent}}%",
+    "installingUpdate": "설치 중…",
+    "updateReady": "데이터 팩 {{version}} 설치 완료. 앱을 다시 시작하면 적용됩니다.",
+    "restartApp": "앱 다시 시작",
+    "autoUpdate": "업데이트 자동 다운로드",
+    "autoUpdateHint": "켜면 시작 시 새 버전을 자동으로 다운로드하고 재시작을 확인합니다.",
+    "importPack": ".hsrpack 수동 가져오기",
+    "rollbackPack": "이전 버전으로 되돌리기",
+    "updateError": "업데이트 실패: {{message}}",
+    "appOutdated": "이 데이터 팩은 더 새로운 앱({{version}} 이상)이 필요합니다.",
+    "updateNotes": "업데이트 노트",
+    "noPrevious": "되돌릴 이전 버전이 없습니다"
   },
   "closePrompt": {
     "title": "창 닫기",
@@ -563,5 +585,10 @@
     "localEmptyDesc": "메모를 만들어 임시 생각이나 이미지, 파일을 모아 두세요.",
     "uploadFailed": "작업에 실패했습니다. 다시 시도하세요",
     "color": "메모 색상"
+  },
+  "update": {
+    "banner": "데이터 팩 {{version}}을(를) 사용할 수 있습니다",
+    "go": "업데이트",
+    "dismiss": "무시"
   }
 }

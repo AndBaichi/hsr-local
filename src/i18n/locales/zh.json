@@ -170,7 +170,29 @@
     "cursorTheme": "鼠标指针",
     "cursorThemeDesc": "应用内的鼠标指针样式（内置银狼主题，随时可切回系统）",
     "cursorSilverWolf": "银狼主题",
-    "cursorSystem": "系统默认"
+    "cursorSystem": "系统默认",
+    "update": "数据包更新",
+    "updateDesc": "从 GitHub Release 检查并安装新版本数据包。下载会校验 sha256，失败时自动保留当前数据包。",
+    "currentVersion": "当前版本",
+    "latestVersion": "最新版本",
+    "checkUpdate": "检查更新",
+    "checkingUpdate": "正在检查…",
+    "upToDate": "已是最新版本",
+    "notChecked": "尚未检查更新",
+    "updateAvailable": "发现新版本 {{version}}",
+    "downloadUpdate": "下载并安装",
+    "downloadingUpdate": "正在下载… {{percent}}%",
+    "installingUpdate": "正在安装…",
+    "updateReady": "数据包 {{version}} 已安装，重启应用后生效",
+    "restartApp": "重启应用",
+    "autoUpdate": "自动下载更新",
+    "autoUpdateHint": "开启后，启动时发现新版本会自动下载，下载完成后再提示重启",
+    "importPack": "手动导入 .hsrpack",
+    "rollbackPack": "回滚上一版",
+    "updateError": "更新失败：{{message}}",
+    "appOutdated": "这个数据包需要更新应用（需要 {{version}} 或更高版本）",
+    "updateNotes": "更新说明",
+    "noPrevious": "没有可回滚的上一版"
   },
   "closePrompt": {
     "title": "关闭窗口",
@@ -563,5 +585,10 @@
     "localEmptyDesc": "新建一张便签：记临时想法，或把图片、文件收进来当资料夹。",
     "uploadFailed": "操作失败，请重试",
     "color": "便签颜色"
+  },
+  "update": {
+    "banner": "数据包 {{version}} 可用",
+    "go": "去更新",
+    "dismiss": "忽略"
   }
 }

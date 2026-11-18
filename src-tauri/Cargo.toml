@@ -37,6 +37,10 @@ thiserror = "2"
 # 数据包（.hsrpack）读取：只需要 store/deflate，不要加密、bzip2、zstd 等一堆可选后端
 zip = { version = "2", default-features = false, features = ["deflate"] }
 
+# v4.8 客户端更新：下载 .hsrpack 并校验 sha256
+sha2 = "0.10"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "native-tls"] }
+
 # 没有 `[dev-dependencies]`：断言全部集中在 `src/selftest.rs`（`cargo run --bin selftest`），
 # 不用 libtest harness（在本工具链下起不来，见 README「已知限制」）。
 # 临时目录用 `selftest.rs` 自带的 30 行 `TempDir`，省掉一个只为测试存在的依赖。

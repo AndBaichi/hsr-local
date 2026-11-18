@@ -45,6 +45,16 @@ pub fn active_pointer_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, Ap
     Ok(appdata_root(app)?.join("active.json"))
 }
 
+/// 上一版数据包指针（`$APPDATA/previous.json`）：客户端更新时写，回滚时读。
+pub fn previous_pointer_path<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, AppError> {
+    Ok(appdata_root(app)?.join("previous.json"))
+}
+
+/// 更新下载临时目录（`$APPDATA/update`）。
+pub fn update_dir<R: Runtime>(app: &AppHandle<R>) -> Result<PathBuf, AppError> {
+    Ok(appdata_root(app)?.join("update"))
+}
+
 /// 内置数据包目录（`$RESOURCE/datapack`）
 ///
 /// dev 模式下 `resource_dir()` 指向 `target/debug`，读不到数据包（附录 B 坑 #10），
@@ -78,5 +88,6 @@ pub fn ensure_dir(path: &PathBuf) -> Result<(), AppError> {
 pub fn ensure_app_dirs<R: Runtime>(app: &AppHandle<R>) -> Result<(), AppError> {
     ensure_dir(&packs_dir(app)?)?;
     ensure_dir(&userdata_dir(app)?)?;
+    ensure_dir(&update_dir(app)?)?;
     Ok(())
 }

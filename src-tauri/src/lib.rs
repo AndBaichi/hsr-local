@@ -13,6 +13,7 @@ pub mod pack;
 pub mod paths;
 pub mod selftest;
 pub mod tray;
+pub mod update;
 pub mod userdata;
 
 use tauri::{Manager, State};
@@ -93,6 +94,11 @@ pub fn run() {
             tray::hide_main_window,
             tray::quit_app,
             tray::tray_set_labels,
+            update::update_fetch_manifest,
+            update::datapack_install_from_url,
+            update::datapack_install_file,
+            update::datapack_rollback,
+            update::datapack_has_previous,
         ])
         .setup(move |app| {
             let handle = app.handle().clone();

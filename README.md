@@ -656,3 +656,70 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > ② `installer.nsi:694` 会把 `selftest.exe`（约 558 KB 的独立自检程序）一并打进安装包，
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
+
+## 7. 客户端数据包更新（v2.18，应用版本 4.7.51 线）
+
+从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
+
+### 7.1 固定的更新地址
+
+- manifest（应用检查这个）：
+  `https://github.com/AndBaichi/hsr-local/releases/latest/download/update.json`
+- 数据包：`update.json` 里的 `url` 字段，指向 `releases/download/datapack-{版本}/hsr-local-{版本}.hsrpack`
+
+仓库已改为 **Public**，上面两个地址都可以匿名访问。
+
+### 7.2 CI 怎么出包
+
+`.github/workflows/datapack.yml`：
+
+- 每天 `03:17 UTC`（北京时间 11:17）跑一次；
+- 用 `scripts/detect-upstream-version.mjs` 读 `https://hsr.nanoka.cc/peak` 找版本号；
+- 若 `datapack-{版本}` Release 已存在则跳过（手动触发可勾 `force` 强制重建）；
+- 否则 `npm run datapack:full`：主构建（不 pack）→ 额外栏目 → `repack`；
+- `npm run update:manifest` 生成 `update.json`（字节数 / 条目数 / sha256 / 下载地址 / `minAppVersion`）；
+- `gh release create datapack-{版本}` 上传 `.hsrpack` + `update.json`，并标记 latest。
+
+首次构建踩过一个坑：`build-extra-modules.mjs` 在读 `db/zh/currency/role.json` 时，这个文件还在后面的下载任务里，导致 CI 全新环境少 552 个角色详情（6808 而不是 7360 条目）。现在本地没有该文件时直接从源站读一次，已修复并强制重建验证。
+
+### 7.3 客户端怎么更新
+
+- 启动后 **10 秒**静默检查一次，24 小时内不重复；手动检查不受限制；
+- 默认**只提示**（顶栏下方横幅 + 设置页「数据包更新」），不自动下载 78 MB；
+- 设置里可开「自动下载更新」；开启后检查到新版自动下载，完成后仍提示重启；
+- 下载：Rust `reqwest`（`native-tls`，走 Windows 系统证书库）流式写入
+  `%APPDATA%\com.hsr.local.databank\update\`，每 1 MB 发一次进度事件；
+- 校验：字节数 + sha256，缺一不装；
+- 安装：解包到 `packs/.staging-*` → 读 `meta.json`（`schemaVersion` 必须为 1）→
+  改名成 `packs/{packId}-{时间戳}` → 备份当前 `active.json` 到 `previous.json` →
+  原子写新指针 → 刷新 `PackState` 与索引缓存；
+- 失败：删临时文件/staging，**不碰** `active.json`，继续用旧包；
+- 生效：`location.reload()`（BootGuard 重新读索引）；设置页 / 横幅都有「重启应用」按钮；
+- 回滚：`datapack_rollback` 把 `previous.json` 写回 `active.json`，清缓存后重载；
+- 手动导入：设置页选本地 `.hsrpack`，走同一套安装逻辑（`source = manual`）。
+
+### 7.4 几个必须知道的实现细节
+
+- **`active.json` 的 `source`**：`builtin` / `update` / `manual`。
+  启动时 `update` / `manual` 的包不会被旧安装包里的内置包覆盖；只有内置数据的
+  `gameVersion` **更高**（用户升级了程序）才重新展开内置包。
+- **计数校验只对内置包**：`read_meta` 原先用编译期 `EXPECTED_COUNTS`（4.7.51）卡所有包，
+  未来 4.7.52 一装就会被判「内容不完整」。现在只在 `extract_builtin_pack` 里校验；
+  外部包依赖 manifest 的 sha256 保证完整性。
+- **为什么用 native-tls**：本机 hosts 把 GitHub 指到 `127.0.0.1:443`（Steam++ 加速器），
+  它用自签 CA 重签证书；`rustls` 自带 webpki 根证书不认，报 `invalid peer certificate:
+  UnknownIssuer`。`native-tls` 用 Windows 证书库，和浏览器一致。
+- **旧包清理**：每次更新会产生一份约 160 MB 的完整目录；启动时只保留
+  `active` / `previous` / 内置包三份，其余 `packs/hsr-*` 与 `packs/.staging-*` 删除；
+  `update/` 下的残留临时文件也一并清掉。
+- **错误 sha256**：会返回 `数据包 sha256 校验失败`，临时文件删除，`active.json` 保持不变。
+
+### 7.5 验证记录（2026-11-18）
+
+- 真实 `update.json`：检查成功，当前 4.7.51 → 「已是最新版本」；
+- 258 B 测试包：完整 URL 下载 + sha256 + 安装 + 回滚，3 秒；
+- 78 MB 本地完整包：手动导入 14 秒；重启进程后仍指向外部目录，角色页 101 条正常；
+- UI「回滚上一版」→ active 恢复内置包 → 「重启应用」→ 角色页正常；
+- 错误 sha256：拒绝且 active 不变；
+- 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
+- 回归：typecheck 0 错、vitest **115 passed**。

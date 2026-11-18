@@ -10,12 +10,13 @@
  * prefs.json 里带着这个键，删字段会让反序列化与 `resetPrefs` 失配；只是不再有
  * UI 入口，四个语言的 `settings.pageSize*` 文案也一并留着（见 PRD §4.10）。
  *
- * 数据包信息一律只读展示：更新/回滚机制尚未实现，不提供任何导入 UI。
+ * 数据包分区同时承担 v4.8 的更新/回滚/手动导入 UI；下载与解包全部走 Rust 命令。
  * 所有可能缺失的包信息用 `common.unknown` 兜底，绝不打印 "undefined"。
  */
 
 import { invoke } from '@tauri-apps/api/core';
-import { useState, type ReactNode } from 'react';
+import { open } from '@tauri-apps/plugin-dialog';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PagePlaceholder } from '@/components/common/PagePlaceholder';
@@ -26,6 +27,7 @@ import { LANGUAGE_ORDER, type Lang } from '@/i18n';
 import { useFavoritesStore } from '@/stores/favorites';
 import { useNotesStore } from '@/stores/notes';
 import { useSettingsStore } from '@/stores/settings';
+import { useUpdaterStore } from '@/stores/updater';
 
 /**
  * 原 T01 占位实现：页面已接入真实内容，此处不再渲染，
@@ -152,10 +154,31 @@ export default function SettingsPage(): ReactNode {
   const setShortcutsEnabled = useSettingsStore((state) => state.setShortcutsEnabled);
   const setCloseAction = useSettingsStore((state) => state.setCloseAction);
   const setCursorTheme = useSettingsStore((state) => state.setCursorTheme);
+  const setAutoUpdate = useSettingsStore((state) => state.setAutoUpdate);
+  const updater = useUpdaterStore();
   const resetPrefs = useSettingsStore((state) => state.resetPrefs);
 
   const [pending, setPending] = useState<PendingAction | undefined>(undefined);
-  const [folderError, setFolderError] = useState<string | undefined>(undefined);
+  const [importError, setImportError] = useState<string | undefined>(undefined);
+
+  // 设置页挂载时确认一次「有没有可回滚的上一版」
+  useEffect(() => {
+    void updater.refreshPrevious();
+  }, [updater.refreshPrevious]);
+
+  /** 手动导入：选一个 .hsrpack 并安装 */
+  const handleImportPack = async (): Promise<void> => {
+    setImportError(undefined);
+    try {
+      const selected = await open({
+        multiple: false,
+        filters: [{ name: 'HSR Pack', extensions: ['hsrpack'] }],
+      });
+      if (typeof selected === 'string') await updater.installFile(selected);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : String(error));
+    }
+  };  const [folderError, setFolderError] = useState<string | undefined>(undefined);
 
   const handleOpenFolder = (): void => {
     setFolderError(undefined);
@@ -182,7 +205,51 @@ export default function SettingsPage(): ReactNode {
   };
 
   const unknownLabel = t('common.unknown') as string;
-  const dangerButton =
+  const updatePercent =
+    updater.total > 0 ? Math.min(100, Math.round((updater.downloaded / updater.total) * 100)) : 0;
+  const updateBusy =
+    updater.phase === 'checking' ||
+    updater.phase === 'downloading' ||
+    updater.phase === 'installing';
+  const latestVersion = updater.manifest?.gameVersion ?? '—';
+  const installedVersion = updater.installed?.gameVersion ?? latestVersion;
+  const currentVersion =
+    updater.phase === 'ready' && updater.installed !== undefined
+      ? updater.installed.gameVersion
+      : dal.bootInfo?.gameVersion;
+  let updateStatus = t('settings.notChecked') as string;
+  switch (updater.phase) {
+    case 'checking':
+      updateStatus = t('settings.checkingUpdate') as string;
+      break;
+    case 'up-to-date':
+      updateStatus = t('settings.upToDate') as string;
+      break;
+    case 'available':
+      updateStatus = t('settings.updateAvailable', { version: latestVersion }) as string;
+      break;
+    case 'app-outdated':
+      updateStatus = t('settings.appOutdated', {
+        version: updater.manifest?.minAppVersion ?? '—',
+      }) as string;
+      break;
+    case 'downloading':
+      updateStatus = t('settings.downloadingUpdate', { percent: updatePercent }) as string;
+      break;
+    case 'installing':
+      updateStatus = t('settings.installingUpdate') as string;
+      break;
+    case 'ready':
+      updateStatus = t('settings.updateReady', { version: installedVersion }) as string;
+      break;
+    case 'error':
+      updateStatus = t('settings.updateError', {
+        message: updater.error ?? unknownLabel,
+      }) as string;
+      break;
+    default:
+      break;
+  }  const dangerButton =
     'rounded-btn border border-line bg-elev px-3 py-1.5 text-xs text-danger hover:text-ink';
 
   return (
@@ -212,13 +279,14 @@ export default function SettingsPage(): ReactNode {
         </div>
       </Section>
 
-      {/* 2. 数据包：只读信息，更新/回滚机制尚未实现 */}
+      {/* 2. 数据包：信息 + 更新 / 回滚 / 手动导入（v4.8） */}
       <Section title={t('settings.datapack') as string} description={t('settings.datapackDesc') as string}>
         <div className="flex flex-col gap-2">
           <InfoRow
-            label={t('settings.packVersion') as string}
-            value={orUnknown(dal.bootInfo?.gameVersion, unknownLabel)}
+            label={t('settings.currentVersion') as string}
+            value={orUnknown(currentVersion, unknownLabel)}
           />
+          <InfoRow label={t('settings.latestVersion') as string} value={latestVersion} />
           <InfoRow
             label={t('settings.packId') as string}
             value={orUnknown(dal.bootInfo?.packId, unknownLabel)}
@@ -227,7 +295,107 @@ export default function SettingsPage(): ReactNode {
             label={t('settings.schemaVersion') as string}
             value={orUnknown(dal.meta?.schemaVersion, unknownLabel)}
           />
-          <p className="text-[11px] text-dim">{t('settings.readOnly') as string}</p>
+        </div>
+
+        <div className="mt-1 flex flex-col gap-2 border-t border-line pt-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-sm font-medium text-ink">{t('settings.update') as string}</h3>
+            <span
+              className={`text-[11px] ${
+                updater.phase === 'error' ? 'text-danger' : 'text-dim'
+              }`}
+            >
+              {updateStatus}
+            </span>
+          </div>
+          <p className="text-[11px] leading-relaxed text-dim">
+            {t('settings.updateDesc') as string}
+          </p>
+
+          {updater.phase === 'downloading' ? (
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-200"
+                  style={{ width: `${updatePercent}%` }}
+                />
+              </div>
+              <span className="w-10 text-right text-[11px] text-dim">{updatePercent}%</span>
+            </div>
+          ) : null}
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={updateBusy}
+              onClick={() => void updater.check(true)}
+              className="rounded-btn border border-line bg-elev px-3 py-1.5 text-xs text-ink hover:border-accent disabled:cursor-default disabled:opacity-40"
+            >
+              {updater.phase === 'checking'
+                ? (t('settings.checkingUpdate') as string)
+                : (t('settings.checkUpdate') as string)}
+            </button>
+
+            {updater.phase === 'available' ||
+            (updater.phase === 'error' && updater.manifest !== undefined) ? (
+              <button
+                type="button"
+                disabled={updateBusy}
+                onClick={() => void updater.download()}
+                className="rounded-btn border border-accent/50 bg-accent/15 px-3 py-1.5 text-xs text-accent hover:bg-accent/25 disabled:cursor-default disabled:opacity-40"
+              >
+                {t('settings.downloadUpdate') as string}
+              </button>
+            ) : null}
+
+            {updater.phase === 'ready' ? (
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-btn border border-accent/50 bg-accent/15 px-3 py-1.5 text-xs text-accent hover:bg-accent/25"
+              >
+                {t('settings.restartApp') as string}
+              </button>
+            ) : null}
+
+            <button
+              type="button"
+              disabled={updateBusy}
+              onClick={() => void handleImportPack()}
+              className="rounded-btn border border-line bg-elev px-3 py-1.5 text-xs text-ink hover:border-accent disabled:cursor-default disabled:opacity-40"
+            >
+              {t('settings.importPack') as string}
+            </button>
+
+            <button
+              type="button"
+              disabled={updateBusy || !updater.hasPrevious}
+              title={updater.hasPrevious ? undefined : (t('settings.noPrevious') as string)}
+              onClick={() => void updater.rollback()}
+              className="rounded-btn border border-line bg-elev px-3 py-1.5 text-xs text-ink hover:border-accent disabled:cursor-default disabled:opacity-40"
+            >
+              {t('settings.rollbackPack') as string}
+            </button>
+          </div>
+
+          {updater.manifest?.notes ? (
+            <p className="text-[11px] leading-relaxed text-dim">
+              {t('settings.updateNotes') as string}：{updater.manifest.notes}
+            </p>
+          ) : null}
+
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-ink">
+            <input
+              type="checkbox"
+              checked={prefs.autoUpdate}
+              onChange={(event) => setAutoUpdate(event.target.checked)}
+              className="h-4 w-4"
+            />
+            <span>{t('settings.autoUpdate') as string}</span>
+          </label>
+          <p className="text-[11px] text-dim">{t('settings.autoUpdateHint') as string}</p>
+
+          {importError ? <p className="text-[11px] text-danger">{importError}</p> : null}
         </div>
       </Section>
 
