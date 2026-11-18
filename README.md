@@ -723,3 +723,6 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
+- 当前安装包：`星穹铁道数据库_4.7.51_x64-setup.exe`，84,633,495 B（80.71 MiB），
+  SHA-256 `0c4bebb33e553fcee38eaf8c322c6eb391ec00c7bbecbc4a35ed2dfc39ed2f5a`
+  （2026-11-18 21:41 构建，含本节的客户端更新）。
