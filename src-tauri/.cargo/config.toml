@@ -2,10 +2,10 @@
 #
 # ⚠️ 磁盘铁律：target-dir 必须在本项目的 C 盘目录内。
 #    D 盘是用户的 U 盘，严禁写入。这里用绝对路径而非相对路径，
-#    因为相对路径的解析基准是 .cargo 的父目录，容易出错。
+#    相对路径以 src-tauri 为基准，本地和 CI 都能落在工作区内。
 
 [build]
-target-dir = "C:/Users/26609/WorkBuddy/2026-11-15-06-45-01/hsr-local/src-tauri/target"
+target-dir = "target"
 
 [target.x86_64-pc-windows-gnu]
 linker = "C:/Users/26609/AppData/Local/Microsoft/WinGet/Packages/BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin/gcc.exe"

@@ -439,7 +439,7 @@ fn all_cases() -> Vec<CaseResult> {
     cases.push(case("pack: sanitize 接受正常路径", pack_sanitize_accepts_normal));
     cases.push(case("pack: read_meta 拒绝不兼容 schemaVersion", pack_meta_rejects_schema));
     cases.push(case("pack: read_meta 接受 schemaVersion=1", pack_meta_accepts_schema));
-    cases.push(case("pack: read_meta 拒绝计数不符", pack_meta_rejects_counts));
+    cases.push(case("pack: read_meta 接受不同计数（外部版本）", pack_meta_accepts_new_counts));
     cases.push(case("pack: counts_mismatch 报第一处差异", pack_counts_mismatch_first));
     cases.push(case("pack: read_stats 真读索引文件", pack_read_stats));
     cases.push(case("pack: read_stats 名称回退到 name", pack_read_stats_falls_back_to_name));
@@ -691,21 +691,20 @@ fn pack_meta_accepts_schema() {
     assert_eq!(meta.schema_version, SUPPORTED_SCHEMA_VERSION);
 }
 
-fn pack_meta_rejects_counts() {
-    let dir = TempDir::new("meta-counts-bad");
+fn pack_meta_accepts_new_counts() {
+    let dir = TempDir::new("meta-counts-new-version");
     fs::write(
         dir.path().join("meta.json"),
-        br#"{"packId":"hsr-4.7.51-local","gameVersion":"4.7.51","schemaVersion":1,
-             "counts":{"character":100,"lightcone":174,"relicset":64,"monster":666,
+        br#"{"packId":"hsr-4.7.52-local","gameVersion":"4.7.52","schemaVersion":1,
+             "counts":{"character":102,"lightcone":174,"relicset":64,"monster":666,
                        "monsterGroups":382,"item":1606,"achievement":2022,"achievementSeries":9}}"#,
     )
     .expect("写入失败");
-    let error = read_meta(dir.path()).expect_err("计数不符应被拒绝");
-    assert_eq!(format!("{:?}", error.code), "PackCorrupt");
-    assert!(error
-        .detail
-        .unwrap_or_default()
-        .contains("character=100"));
+    // 外部数据版本计数必然变化：read_meta 只校验 schema，
+    // 内置包的计数校验在 extract_builtin_pack 里单独做。
+    let meta = read_meta(dir.path()).expect("外部版本计数变化不应被 read_meta 拒绝");
+    assert_eq!(meta.counts.character, 102);
+    assert!(counts_mismatch(&meta.counts).is_some());
 }
 
 fn pack_counts_mismatch_first() {
