@@ -724,7 +724,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
 - 当前安装包：`星穹铁道数据库_4.7.51_x64-setup.exe`，84,634,007 B（80.71 MiB），
-  SHA-256 `ca99b179ad0e79ac0a43c2f8ea61a56adf5a5bb6c5885b8931bda9f18cf6fe8c`
+  SHA-256 `6bd700fbada27b9e866d97d49cff0a7afa7a802a212083181c613aa61b4faa84`
   （2026-11-18 21:41 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -735,3 +735,10 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - `<variable>` 是战斗内数值，原站显示「战斗中决定」；此前用 `param_list` 算成
   「当前提高：1%」，现在统一显示占位文案。
 - 用无头 Edge 逐个比对源站 82 张卡与本地 82 张卡的文本，除源站重复推荐角色去重外无缺失。
+### 7.7 角色名里的宏标签清理（v2.20）
+
+- 源站有个别角色名带样式标签，例如 `银狼LV.<unbreak>999</unbreak>`；
+  `RoleCard` 之前按纯文本渲染，会把 `<unbreak>` 原样显示出来。
+- 现在 `currencyDisplayName` 统一用 `macroTextToPlain` 压平（保留正文、去掉标签），
+  卡片、详情、搜索、右键快照、对比页共用同一入口。
+- 实测角色图鉴 4 张「银狼LV.999」卡显示正常，页面内 `<unbreak>` 计数 0。
