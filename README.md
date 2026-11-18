@@ -626,7 +626,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   `:603` 才用 `NSISdl::download` 从 `go.microsoft.com/fwlink/p/?LinkId=2124703`
   **现场下载**引导器，下载失败即 `Abort`（`:605-609`），成功后 `:636 ExecWait` 静默安装。
   已装 WebView2 的机器（Win11 / 已更新的 Win10）整段跳过，全程不联网。
-  ② **运行期（游戏数据读取）**：零网络请求 —— 全部数据 / 图片来自内嵌 pack，
+  ② **运行期（游戏数据读取）**：游戏数据自身零网络请求 —— 全部数据 / 图片来自内嵌 pack，
   源码里不出现 `nanoka.cc` 等原站域名。**运行期联网点：数据包更新检查、应用更新检查、首页公告 / 资讯**
   （`src/lib/news/miyoushe.ts`，请求米游社 `-static` 只读域，CORS 为 `*`，不经 Rust 代理）；
   首页公告/资讯在 en/ja/ko 下不渲染也不发请求；更新检查失败静默，不阻塞首屏。
