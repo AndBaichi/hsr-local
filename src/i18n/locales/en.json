@@ -434,7 +434,8 @@
     "recommendRoles": "Recommended characters",
     "healer": "Healer",
     "shielder": "Shield",
-    "labelValueSeparator": ": "
+    "labelValueSeparator": ": ",
+    "determinedInBattle": "Determined in battle"
   },
   "currencyDetail": {
     "starLevel": "Star Level",

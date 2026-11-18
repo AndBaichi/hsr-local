@@ -434,7 +434,8 @@
     "recommendRoles": "推荐角色",
     "healer": "治疗",
     "shielder": "护盾",
-    "labelValueSeparator": "："
+    "labelValueSeparator": "：",
+    "determinedInBattle": "战斗中决定"
   },
   "currencyDetail": {
     "starLevel": "星级",

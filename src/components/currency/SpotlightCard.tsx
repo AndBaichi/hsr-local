@@ -26,6 +26,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { MacroText } from '@/components/common/MacroText';
+import { expandGridFightInfo, replaceVariablePlaceholders } from '@/lib/text/gridfight';
 import { SafeImage } from '@/components/common/SafeImage';
 import {
   currencyDisplayName,
@@ -46,6 +47,12 @@ export interface SpotlightCardProps {
   readonly trait?: CurrencyEntry;
   /** 推荐角色的显示名解析（推荐列表只给 id，名字要向角色图鉴查） */
   readonly roleLabelOf: (id: string) => string;
+  /**
+   * `<gridfightinfo type=item id=…>` 的显示名解析（v2.19）。
+   *
+   * 源站这个标签自身没有正文，只给 id；不解析会在卡片上留下 `可通过【】获取…`。
+   */
+  readonly infoLabelOf?: (type: string, id: string) => string | undefined;
   /** 打开详情面板（图鉴没有单条路由，详情是页内弹层） */
   readonly onOpen: () => void;
   /** 右上角操作区（评级徽标等），由调用方决定 */
@@ -97,6 +104,7 @@ export function SpotlightCard({
   entry,
   trait,
   roleLabelOf,
+  infoLabelOf,
   onOpen,
   actions,
   onContextMenu,
@@ -113,6 +121,33 @@ export function SpotlightCard({
   const layers = trait === undefined ? [] : currencyLayers(trait);
   const traitName = trait === undefined ? '' : currencyDisplayName(trait, 'trait', t);
   const recommends = recommendIds(entry);
+
+  /**
+   * 卡片内所有宏文本的统一预处理：
+   *  - `<gridfightinfo>` → 条目名（物品图鉴 / 角色图鉴）
+   *  - `<variable>` → 「战斗中决定」（静态包拿不到战斗内数值）
+   */
+  const localizeMacro = (value: string | null | undefined): string | undefined => {
+    if (typeof value !== 'string' || value.trim() === '') return undefined;
+    return replaceVariablePlaceholders(
+      expandGridFightInfo(value, infoLabelOf),
+      t('currency.determinedInBattle') as string,
+    );
+  };
+
+  const descText = localizeMacro(entry.desc);
+  // 「闭关」的 remark 是 `所需节点数：#1`，param_list 为空；原站显示「战斗中决定」。
+  // 备注里没有可代入的参数时，把残留占位也换成同一个本地化占位。
+  const remarkText =
+    remark === undefined
+      ? undefined
+      : (() => {
+          const text = localizeMacro(remark.desc);
+          if (text === undefined) return undefined;
+          return remark.params.length === 0
+            ? text.replace(/#\d+(?:\[[^\]]+\])?%?/g, t('currency.determinedInBattle') as string)
+            : text;
+        })();
 
   return (
     <div className="relative h-full" onContextMenu={onContextMenu}>
@@ -159,13 +194,13 @@ export function SpotlightCard({
           <span className="font-semibold text-ink">{`+${difficulty}`}</span>
         </div>
 
-        {typeof entry.desc === 'string' && entry.desc.trim() !== '' ? (
-          <MacroText value={entry.desc} paramList={params} className="mt-3 text-sm leading-relaxed" />
+        {descText !== undefined ? (
+          <MacroText value={descText} paramList={params} className="mt-3 text-sm leading-relaxed" />
         ) : null}
 
-        {remark !== undefined ? (
+        {remark !== undefined && remarkText !== undefined ? (
           <MacroText
-            value={remark.desc}
+            value={remarkText}
             paramList={remark.params}
             className="mt-3 text-xs leading-relaxed text-dim"
           />
@@ -183,7 +218,7 @@ export function SpotlightCard({
                   {t('currency.layer')} {layer.level}
                 </span>
                 <MacroText
-                  value={layer.desc}
+                  value={localizeMacro(layer.desc)}
                   paramList={layer.params}
                   className="mt-1 whitespace-pre-line"
                 />

@@ -434,7 +434,8 @@
     "recommendRoles": "추천 캐릭터",
     "healer": "힐러",
     "shielder": "보호막",
-    "labelValueSeparator": ": "
+    "labelValueSeparator": ": ",
+    "determinedInBattle": "전투 중 결정"
   },
   "currencyDetail": {
     "starLevel": "별 레벨",

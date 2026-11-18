@@ -28,6 +28,7 @@ import { TraitCard } from '@/components/currency/TraitCard';
 import { ErrorState } from '@/components/common/ErrorState';
 import { FilterBar, PagedGrid, type FilterDef } from '@/components/common/ListControls';
 import { MacroText } from '@/components/common/MacroText';
+import { expandGridFightInfo, replaceVariablePlaceholders } from '@/lib/text/gridfight';
 import { openEntityContextMenu } from '@/components/common/ContextMenu';
 import { SafeImage } from '@/components/common/SafeImage';
 import { SkeletonCardGrid } from '@/components/common/SkeletonBlock';
@@ -204,12 +205,15 @@ function useCardBadges(entry: CurrencyEntry): readonly string[] {
 function FieldValue({
   value,
   params,
+  transform,
 }: {
   readonly value: unknown;
   readonly params: readonly number[];
+  /** 可选的宏文本预处理（主角光环详情用） */
+  readonly transform?: (value: string) => string;
 }): ReactNode {
   if (typeof value === 'string') {
-    return <MacroText value={value} paramList={params} />;
+    return <MacroText value={transform === undefined ? value : transform(value)} paramList={params} />;
   }
   return (
     <pre className="whitespace-pre-wrap break-all font-mono text-xs text-dim">
@@ -222,12 +226,14 @@ function FieldValue({
 function LayerValue({
   value,
   params,
+  transform,
 }: {
   readonly value: unknown;
   readonly params: readonly number[];
+  readonly transform?: (value: string) => string;
 }): ReactNode {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return <FieldValue value={value} params={params} />;
+    return <FieldValue value={value} params={params} transform={transform} />;
   }
   return (
     <div className="flex flex-col gap-2">
@@ -241,12 +247,12 @@ function LayerValue({
                 .map(([field, fieldValue]) => (
                   <div key={field} className="flex flex-wrap items-start gap-x-2 gap-y-0.5">
                     <span className="shrink-0 font-mono text-[11px] text-dim">{field}</span>
-                    <FieldValue value={fieldValue} params={params} />
+                    <FieldValue value={fieldValue} params={params} transform={transform} />
                   </div>
                 ))}
             </div>
           ) : (
-            <FieldValue value={layer} params={params} />
+            <FieldValue value={layer} params={params} transform={transform} />
           )}
         </div>
       ))}
@@ -362,12 +368,19 @@ function EntryDetail({
   entry,
   kind,
   onClose,
+  infoLabelOf,
 }: {
   readonly entry: CurrencyEntry;
   readonly kind: CurrencyKind;
   readonly onClose: () => void;
+  readonly infoLabelOf?: (type: string, id: string) => string | undefined;
 }): ReactNode {
   const { t } = useTranslation();
+  const localize = (value: string): string =>
+    replaceVariablePlaceholders(
+      expandGridFightInfo(value, infoLabelOf),
+      t('currency.determinedInBattle') as string,
+    );
   const params = currencyParams(entry);
   const id = String(entry.id);
   const badges = useCardBadges(entry);
@@ -429,9 +442,9 @@ function EntryDetail({
           <div key={key} className="flex flex-col gap-1 border-t border-line pt-2">
             <div className="text-xs font-semibold text-dim">{labelOf(key)}</div>
             {key === 'layer' ? (
-              <LayerValue value={entry[key]} params={params} />
+              <LayerValue value={entry[key]} params={params} transform={localize} />
             ) : (
-              <FieldValue value={entry[key]} params={params} />
+              <FieldValue value={entry[key]} params={params} transform={localize} />
             )}
           </div>
         ))}
@@ -507,8 +520,11 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
   const [roleEntries, setRoleEntries] = useState<readonly CurrencyEntry[]>([]);
   //  - 主角光环的 `trait_id` 指向羁绊图鉴，要渲染羁绊名与各档层级
   const [traitEntries, setTraitEntries] = useState<readonly CurrencyEntry[]>([]);
+  //  - 主角光环描述里的 `<gridfightinfo type=item id=…>` 要解析成物品名
+  const [itemEntries, setItemEntries] = useState<readonly CurrencyEntry[]>([]);
   const needsRoles = kind === 'trait' || kind === 'spotlight';
   const needsTraits = kind === 'spotlight';
+  const needsItems = kind === 'spotlight';
   // 本图鉴是否已经评过任何一条：评过就不再提示"点徽标可评级"，提示只在首次出现
   const ratedHere = useRatingsStore((state) =>
     Object.keys(state.items).some((key) => key.startsWith(`currency:${kind}:`)),
@@ -576,6 +592,26 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
     };
   }, [needsTraits, lang]);
 
+  // 主角光环描述里的物品 id → 物品条目（只用来把 `<gridfightinfo>` 解析成名字）
+  useEffect(() => {
+    if (!needsItems) {
+      setItemEntries([]);
+      return;
+    }
+    let cancelled = false;
+    void getCurrencyEntries('item', lang)
+      .then((list) => {
+        if (cancelled) return;
+        setItemEntries(list.map((entry, index) => ({ ...entry, id: String(entry.id ?? index) })));
+      })
+      .catch(() => {
+        if (!cancelled) setItemEntries([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsItems, lang]);
+
   // 角色 id → 条目（羁绊成员、光环推荐角色两处都要按 id 反查名字与头像）
   const roleById = useMemo(
     () => new Map(roleEntries.map((entry) => [String(entry.id), entry])),
@@ -596,6 +632,23 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
       return role === undefined ? id : currencyDisplayName(role, 'role', t);
     },
     [roleById, t],
+  );
+
+  // 物品 id → 显示名（`<gridfightinfo type=item>` 用）
+  const itemById = useMemo(
+    () => new Map(itemEntries.map((entry) => [String(entry.id), entry])),
+    [itemEntries],
+  );
+  const infoLabelOf = useCallback(
+    (type: string, id: string): string | undefined => {
+      if (type === 'item') {
+        const item = itemById.get(id);
+        return item === undefined ? undefined : currencyDisplayName(item, 'item', t);
+      }
+      if (type === 'role') return roleLabelOf(id);
+      return undefined;
+    },
+    [itemById, roleLabelOf, t],
   );
 
   // 消费 `?entry=`：数据到位后直接打开该条详情，再把参数从地址栏抹掉。
@@ -832,6 +885,7 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
                       entry={entry}
                       trait={traitById.get(traitId)}
                       roleLabelOf={roleLabelOf}
+                      infoLabelOf={infoLabelOf}
                       onOpen={() => setSelected(entry)}
                       actions={
                         <div className="flex items-center gap-1">
@@ -880,7 +934,12 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
             onClick={(event) => event.stopPropagation()}
             role="presentation"
           >
-            <EntryDetail entry={selected} kind={kind} onClose={() => setSelected(null)} />
+            <EntryDetail
+              entry={selected}
+              kind={kind}
+              infoLabelOf={infoLabelOf}
+              onClose={() => setSelected(null)}
+            />
           </div>
         </div>
       ) : null}

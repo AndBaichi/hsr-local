@@ -434,7 +434,8 @@
     "recommendRoles": "おすすめキャラクター",
     "healer": "ヒーラー",
     "shielder": "シールド",
-    "labelValueSeparator": "："
+    "labelValueSeparator": "：",
+    "determinedInBattle": "戦闘中に決定"
   },
   "currencyDetail": {
     "starLevel": "星レベル",

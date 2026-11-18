@@ -723,6 +723,15 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`星穹铁道数据库_4.7.51_x64-setup.exe`，84,633,495 B（80.71 MiB），
-  SHA-256 `0c4bebb33e553fcee38eaf8c322c6eb391ec00c7bbecbc4a35ed2dfc39ed2f5a`
+- 当前安装包：`星穹铁道数据库_4.7.51_x64-setup.exe`，84,634,007 B（80.71 MiB），
+  SHA-256 `ca99b179ad0e79ac0a43c2f8ea61a56adf5a5bb6c5885b8931bda9f18cf6fe8c`
   （2026-11-18 21:41 构建，含本节的客户端更新）。
+
+### 7.6 主角光环卡片内容补全（v2.19）
+
+- 源站宏文本里的 `<gridfightinfo type=item id=…>` 是自闭合标签，自身没有正文；
+  MacroText 的未知标签策略只去标签、保留正文，卡片上会留下 `可通过【】获取【虚弱】`。
+  现在 `src/lib/text/gridfight.ts` 按 type/id 把物品名解析回来，卡片与详情都生效。
+- `<variable>` 是战斗内数值，原站显示「战斗中决定」；此前用 `param_list` 算成
+  「当前提高：1%」，现在统一显示占位文案。
+- 用无头 Edge 逐个比对源站 82 张卡与本地 82 张卡的文本，除源站重复推荐角色去重外无缺失。
