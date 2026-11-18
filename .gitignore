@@ -9,7 +9,7 @@ src-tauri/gen/
 
 # 数据包（80MB+，由 scripts/build-datapack.mjs 生成，不进版本库）
 public/datapack/
-data/
+/data/
 *.hsrpack
 datapack-report.json
 update.json

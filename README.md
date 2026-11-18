@@ -71,7 +71,7 @@ node scripts/build-datapack.mjs --stage build
 图片按**源文件去重**共 1351 张（角色 101、光锥 174、敌人 222、物品+套装 838、属性 7、命途 9）。
 `img/monster/BossIconTemporary.webp` **已补齐**：它确实存在于源站，早前 404 是因为
 `scripts/lib/images.mjs` 误拼成 `Monster_BossIconTemporary.webp`（`BossIconTemporary`
-不加 `Monster_` 前缀），并因此留下了错误的负缓存，现已移到 `_attic/negative-cache/`。
+不加 `Monster_` 前缀），并因此留下了错误的负缓存，现已移到本地归档 `_attic/negative-cache/`（不随仓库分发）。
 
 T02b 追加（见 `docs/03-module-expansion.md`）：终局内容 4 汇总 + 114 赛季 × 4 语言 = 456 详情、
 货币战争 6 图鉴 × 4 语言、更新日志 4 语言差异包、原站导航图标 14 个、货币战争图标约 829 张。
