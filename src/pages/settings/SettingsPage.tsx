@@ -15,6 +15,7 @@
  */
 
 import { invoke } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
 import { open } from '@tauri-apps/plugin-dialog';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ import { useFavoritesStore } from '@/stores/favorites';
 import { useNotesStore } from '@/stores/notes';
 import { useSettingsStore } from '@/stores/settings';
 import { useUpdaterStore } from '@/stores/updater';
+import { useAppUpdaterStore } from '@/stores/appUpdater';
 
 /**
  * 原 T01 占位实现：页面已接入真实内容，此处不再渲染，
@@ -156,15 +158,22 @@ export default function SettingsPage(): ReactNode {
   const setCursorTheme = useSettingsStore((state) => state.setCursorTheme);
   const setAutoUpdate = useSettingsStore((state) => state.setAutoUpdate);
   const updater = useUpdaterStore();
+  const refreshPrevious = useUpdaterStore((state) => state.refreshPrevious);
+  const appUpdater = useAppUpdaterStore();
   const resetPrefs = useSettingsStore((state) => state.resetPrefs);
 
   const [pending, setPending] = useState<PendingAction | undefined>(undefined);
   const [importError, setImportError] = useState<string | undefined>(undefined);
+  const [appVersion, setAppVersion] = useState('');
 
+  useEffect(() => {
+    void getVersion().then(setAppVersion).catch(() => undefined);
+    void useAppUpdaterStore.getState().check(false);
+  }, []);
   // 设置页挂载时确认一次「有没有可回滚的上一版」
   useEffect(() => {
-    void updater.refreshPrevious();
-  }, [updater.refreshPrevious]);
+    void refreshPrevious();
+  }, [refreshPrevious]);
 
   /** 手动导入：选一个 .hsrpack 并安装 */
   const handleImportPack = async (): Promise<void> => {
@@ -213,7 +222,40 @@ export default function SettingsPage(): ReactNode {
     updater.phase === 'installing';
   const latestVersion = updater.manifest?.gameVersion ?? '—';
   const installedVersion = updater.installed?.gameVersion ?? latestVersion;
-  const currentVersion =
+  const appPercent =
+    appUpdater.total > 0 ? Math.min(100, Math.round((appUpdater.downloaded / appUpdater.total) * 100)) : 0;
+  const appBusy =
+    appUpdater.phase === 'checking' ||
+    appUpdater.phase === 'downloading' ||
+    appUpdater.phase === 'installing';
+  const shownAppVersion = appUpdater.currentVersion || appVersion;
+  const shownLatestAppVersion = appUpdater.latestVersion ?? '—';
+  let appStatus = t('settings.appNotChecked') as string;
+  switch (appUpdater.phase) {
+    case 'checking':
+      appStatus = t('settings.appChecking') as string;
+      break;
+    case 'up-to-date':
+      appStatus = t('settings.appUpToDate') as string;
+      break;
+    case 'available':
+      appStatus = t('settings.appAvailable', { version: shownLatestAppVersion }) as string;
+      break;
+    case 'downloading':
+      appStatus = t('settings.appDownloading', { percent: appPercent }) as string;
+      break;
+    case 'installing':
+      appStatus = t('settings.appInstalling') as string;
+      break;
+    case 'ready':
+      appStatus = t('settings.appReady') as string;
+      break;
+    case 'error':
+      appStatus = t('settings.appError', { message: appUpdater.error ?? unknownLabel }) as string;
+      break;
+    default:
+      break;
+  }  const currentVersion =
     updater.phase === 'ready' && updater.installed !== undefined
       ? updater.installed.gameVersion
       : dal.bootInfo?.gameVersion;
@@ -399,6 +441,63 @@ export default function SettingsPage(): ReactNode {
         </div>
       </Section>
 
+      {/* 2b. 应用自身更新（Tauri Updater，v2.21） */}
+      <Section title={t('settings.appUpdate') as string} description={t('settings.appUpdateDesc') as string}>
+        <div className="flex flex-col gap-2">
+          <InfoRow label={t('settings.appCurrentVersion') as string} value={shownAppVersion || '—'} />
+          <InfoRow label={t('settings.appLatestVersion') as string} value={shownLatestAppVersion} />
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className={`text-[11px] ${appUpdater.phase === 'error' ? 'text-danger' : 'text-dim'}`}>
+              {appStatus}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={appBusy}
+                onClick={() => void appUpdater.check(true)}
+                className="rounded-btn border border-line bg-elev px-3 py-1.5 text-xs text-ink hover:border-accent disabled:cursor-default disabled:opacity-40"
+              >
+                {appUpdater.phase === 'checking'
+                  ? (t('settings.appChecking') as string)
+                  : (t('settings.appCheckUpdate') as string)}
+              </button>
+              {appUpdater.phase === 'available' || (appUpdater.phase === 'error' && appUpdater.latestVersion) ? (
+                <button
+                  type="button"
+                  disabled={appBusy}
+                  onClick={() => void appUpdater.install()}
+                  className="rounded-btn border border-accent/50 bg-accent/15 px-3 py-1.5 text-xs text-accent hover:bg-accent/25 disabled:cursor-default disabled:opacity-40"
+                >
+                  {t('settings.appInstall') as string}
+                </button>
+              ) : null}
+              {appUpdater.phase === 'ready' ? (
+                <button
+                  type="button"
+                  onClick={() => void appUpdater.restart()}
+                  className="rounded-btn border border-accent/50 bg-accent/15 px-3 py-1.5 text-xs text-accent hover:bg-accent/25"
+                >
+                  {t('settings.appRestart') as string}
+                </button>
+              ) : null}
+            </div>
+          </div>
+          {appUpdater.phase === 'downloading' && appUpdater.total > 0 ? (
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line">
+                <div
+                  className="h-full rounded-full bg-accent transition-[width] duration-200"
+                  style={{ width: `${appPercent}%` }}
+                />
+              </div>
+              <span className="w-10 text-right text-[11px] text-dim">{appPercent}%</span>
+            </div>
+          ) : null}
+          {appUpdater.notes ? (
+            <p className="text-[11px] leading-relaxed text-dim">{appUpdater.notes}</p>
+          ) : null}
+        </div>
+      </Section>
       {/* 3. 偏好：快捷键开关 */}
       <Section title={t('settings.shortcuts') as string} description={t('settings.shortcutsDesc') as string}>
         <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">

@@ -1,6 +1,6 @@
 [package]
 name = "hsr-local"
-version = "4.7.51"
+version = "4.8.0"
 description = "星穹数据库 · 本地版 —— 完全离线的崩坏：星穹铁道本地资料库"
 authors = ["HSR Local"]
 edition = "2021"
@@ -31,6 +31,8 @@ tauri-plugin-window-state = "2"
 # dialog / opener 的 JS 侧调用在 T03 接入，这里先完成插件注册与权限声明
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"

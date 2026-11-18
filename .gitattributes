@@ -1,0 +1,13 @@
+# 统一换行，避免 Windows 上 core.autocrlf 产生成片 warning
+* text=auto eol=lf
+
+# 二进制资源不做文本转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.hsrpack binary
+*.exe binary
+*.dll binary

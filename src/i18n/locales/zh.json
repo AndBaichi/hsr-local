@@ -192,7 +192,22 @@
     "updateError": "更新失败：{{message}}",
     "appOutdated": "这个数据包需要更新应用（需要 {{version}} 或更高版本）",
     "updateNotes": "更新说明",
-    "noPrevious": "没有可回滚的上一版"
+    "noPrevious": "没有可回滚的上一版",
+    "appUpdate": "应用更新",
+    "appUpdateDesc": "检查并安装程序本体的新版本；安装包会校验 Tauri 签名，数据包更新不影响程序版本。",
+    "appCurrentVersion": "当前程序版本",
+    "appLatestVersion": "最新程序版本",
+    "appCheckUpdate": "检查应用更新",
+    "appChecking": "正在检查…",
+    "appUpToDate": "应用已是最新版本",
+    "appNotChecked": "尚未检查应用更新",
+    "appAvailable": "发现新版本 {{version}}",
+    "appInstall": "下载并安装",
+    "appDownloading": "正在下载… {{percent}}%",
+    "appInstalling": "正在安装，应用会自动退出并重启…",
+    "appReady": "安装完成，重启应用后生效",
+    "appRestart": "重启应用",
+    "appError": "应用更新失败：{{message}}"
   },
   "closePrompt": {
     "title": "关闭窗口",
@@ -435,7 +450,9 @@
     "healer": "治疗",
     "shielder": "护盾",
     "labelValueSeparator": "：",
-    "determinedInBattle": "战斗中决定"
+    "determinedInBattle": "战斗中决定",
+    "properties": "属性",
+    "chapterLimit": "章节限制"
   },
   "currencyDetail": {
     "starLevel": "星级",

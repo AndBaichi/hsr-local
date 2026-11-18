@@ -192,7 +192,22 @@
     "updateError": "更新に失敗しました：{{message}}",
     "appOutdated": "このデータパックには新しいアプリ（{{version}} 以降）が必要です。",
     "updateNotes": "更新内容",
-    "noPrevious": "戻せる前のバージョンがありません"
+    "noPrevious": "戻せる前のバージョンがありません",
+    "appUpdate": "アプリ更新",
+    "appUpdateDesc": "アプリ本体の新しいバージョンを確認・インストールします。インストーラーは Tauri 署名で検証され、データパック更新ではアプリのバージョンは変わりません。",
+    "appCurrentVersion": "現在のアプリバージョン",
+    "appLatestVersion": "最新のアプリバージョン",
+    "appCheckUpdate": "アプリ更新を確認",
+    "appChecking": "確認中…",
+    "appUpToDate": "アプリは最新です",
+    "appNotChecked": "アプリ更新は未確認です",
+    "appAvailable": "新しいバージョン {{version}} があります",
+    "appInstall": "ダウンロードしてインストール",
+    "appDownloading": "ダウンロード中… {{percent}}%",
+    "appInstalling": "インストール中。アプリは自動的に終了して再起動します…",
+    "appReady": "インストール完了。再起動で反映されます。",
+    "appRestart": "アプリを再起動",
+    "appError": "アプリ更新に失敗しました：{{message}}"
   },
   "closePrompt": {
     "title": "ウィンドウを閉じる",
@@ -435,7 +450,9 @@
     "healer": "ヒーラー",
     "shielder": "シールド",
     "labelValueSeparator": "：",
-    "determinedInBattle": "戦闘中に決定"
+    "determinedInBattle": "戦闘中に決定",
+    "properties": "プロパティ",
+    "chapterLimit": "章制限"
   },
   "currencyDetail": {
     "starLevel": "星レベル",

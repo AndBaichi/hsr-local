@@ -75,6 +75,8 @@ pub fn run() {
         )
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .manage(PackState::default())
         // 索引缓存：一次读入 6 个索引常驻内存，按 root 做键（换包即失效）
         .manage(datapack::IndexCache::default())

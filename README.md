@@ -626,10 +626,10 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   `:603` 才用 `NSISdl::download` 从 `go.microsoft.com/fwlink/p/?LinkId=2124703`
   **现场下载**引导器，下载失败即 `Abort`（`:605-609`），成功后 `:636 ExecWait` 静默安装。
   已装 WebView2 的机器（Win11 / 已更新的 Win10）整段跳过，全程不联网。
-  ② **运行期（游戏数据部分）**：零网络请求 —— 全部数据 / 图片来自内嵌 pack，
-  源码里不出现 `nanoka.cc` 等原站域名。**例外是首页公告 / 资讯**
+  ② **运行期（游戏数据读取）**：零网络请求 —— 全部数据 / 图片来自内嵌 pack，
+  源码里不出现 `nanoka.cc` 等原站域名。**运行期联网点：数据包更新检查、应用更新检查、首页公告 / 资讯**
   （`src/lib/news/miyoushe.ts`，请求米游社 `-static` 只读域，CORS 为 `*`，不经 Rust 代理）；
-  该区块在 en / ja / ko 界面下不渲染也不发请求，见下节「联网边界」。
+  首页公告/资讯在 en/ja/ko 下不渲染也不发请求；更新检查失败静默，不阻塞首屏。
 - **排障**：首次构建若在 `Compiling hsr-local` 收尾阶段报
   `failed to remove ... .rcgu.o: 拒绝访问 (os error 5)`，属 Windows 瞬时文件锁 / AV 实时扫描竞态，
   **不是代码缺陷**——链接其实已完成。原样重试同一命令即可（本项目第 2 次重试 EXIT 0，
@@ -639,12 +639,12 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包 | `src-tauri/target/release/bundle/nsis/星穹铁道数据库_4.7.51_x64-setup.exe` |
-| 体积 | **83,931,538 B**（80.04 MiB），mtime 2026-11-17 15:03（v2.9 重打包） |
-| SHA-256 | `de957b50b5af33929d2751ab4fb7560556f07b33d8aafd3d55b70d9a3132bb91` |
+| 安装包 | `src-tauri/target/release/bundle/nsis/星穹铁道数据库_4.8.0_x64-setup.exe` |
+| 体积 | **86,253,457 B**（82.26 MiB），mtime 2026-11-19 05:48（v2.21 / 4.8.0 构建） |
+| SHA-256 | `d2fd818542d4b79bdf0684d4612ea5889454de06fe3e336880b53e18541bf438` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
-| 主程序 | `src-tauri/target/release/hsr-local.exe`，4,779,520 B |
-| 内嵌数据包 | 78,089,854 B / **7359** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `9d2ee912921e7e6e1a7ac3ccde1cd8b956c3d2f909350b67337cded88256eccd` |
+| 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
+| 内嵌数据包 | 78,089,853 B / **7359** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `44c475dfcca29ef80343e776cee66f63869d4c12831570d5c1d2844ffebe4715` |
 | 内嵌证据 | `src-tauri/target/release/nsis/x64/installer.nsi:690` 的 `File /a "/oname=hsr-local-4.7.51.hsrpack"`；暂存副本与根目录 `.hsrpack` SHA-256 完全一致 |
 | 构建日志 | 成功日志 61 行，0 条 WARN/ERROR |
 
@@ -652,12 +652,12 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > ① `bundle.windows.webviewInstallMode = { type: "downloadBootstrapper", silent: true }`
 > ——仅当目标机器**没有** WebView2 Runtime 时，首次安装需要联网取运行时；Win11 与已更新的 Win10
 > 通常自带。**游戏数据部分完全离线**：所有数据 / 图片来自内嵌的 75.9 MB pack，运行期不访问原站；
-> 首页「公告 / 资讯」是唯一联网点（米游社公开接口），断网时回退本地缓存，见 §6.6。
+> 运行期联网点：数据包更新检查、应用更新检查、首页「公告 / 资讯」；游戏数据本身全部来自内嵌 pack，断网仍可正常浏览。
 > ② `installer.nsi:694` 会把 `selftest.exe`（约 558 KB 的独立自检程序）一并打进安装包，
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端数据包更新（v2.18，应用版本 4.7.51 线）
+## 7. 客户端更新（v2.21，应用版本 4.8.0）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,9 +723,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`星穹铁道数据库_4.7.51_x64-setup.exe`，84,634,007 B（80.71 MiB），
-  SHA-256 `6bd700fbada27b9e866d97d49cff0a7afa7a802a212083181c613aa61b4faa84`
-  （2026-11-18 21:41 构建，含本节的客户端更新）。
+- 当前安装包：`星穹铁道数据库_4.8.0_x64-setup.exe`，86,253,457 B（82.26 MiB），
+  SHA-256 `d2fd818542d4b79bdf0684d4612ea5889454de06fe3e336880b53e18541bf438`
+  （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
 
@@ -742,3 +742,28 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 现在 `currencyDisplayName` 统一用 `macroTextToPlain` 压平（保留正文、去掉标签），
   卡片、详情、搜索、右键快照、对比页共用同一入口。
 - 实测角色图鉴 4 张「银狼LV.999」卡显示正常，页面内 `<unbreak>` 计数 0。
+### 7.8 应用本体更新（Tauri Updater，v2.21）
+
+- 应用版本已与数据版本解耦：程序 **4.8.0**，数据包仍 4.7.51。
+- 端点固定为 `https://github.com/AndBaichi/hsr-local/releases/download/app-latest/latest.json`；
+  `app-latest` 是 **prerelease**，不会抢数据包使用的 `releases/latest`。
+- 安装包由 Tauri 生成 minisign 签名（`*.exe.sig`），`latest.json` 里带签名；
+  客户端校签通过后才安装。
+- 设置页「应用更新」可手动检查 / 下载安装 / 重启；启动 10 秒后也会静默检查一次（24h 节流）。
+- 签名私钥在 `~/.tauri/hsr-local.key`，**绝不入库**；CI 需要仓库 Secrets：
+  `TAURI_SIGNING_PRIVATE_KEY`（私钥全文）与 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`（无密码留空）。
+- `release.yml` 在 Windows runner 上构建数据包 → 签名安装包 → 发布 `v{version}` 与
+  `app-latest/latest.json`；`TAURI_SIGNING_PRIVATE_KEY` 缺失时构建会明确失败，不会产出未签名包。
+
+### 7.9 许可证与数据版权
+
+- 代码与文档：**MIT**，见 `LICENSE`。
+- 游戏数据/图片：版权归 miHoYo / HoYoverse，数据整理自 nanoka.cc，**不在 MIT 范围**；
+  仅限个人离线查阅，不得商业使用或再分发素材，详见 `NOTICE.md`。
+- 鼠标指针主题：版权归原指针作者，仓库只做本地主题展示。
+
+### 7.10 版本与分支
+
+- 应用版本：`4.8.0`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 数据版本：`4.7.51`（由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
+- 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。

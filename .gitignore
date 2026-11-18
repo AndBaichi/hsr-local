@@ -31,8 +31,15 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# 本地归档里的旧安装包（80MB+，只留在本机；源码归档仍可提交）
-_attic/artifacts/
+# 本地归档（只留在本机，不随仓库分发）
+_attic/
 
 # WorkBuddy 本地记忆/会话状态
 .workbuddy/
+
+# Tauri 更新签名私钥（绝不进仓库）
+*.key
+*.key.pub
+
+# 由构建/发布脚本生成
+latest.json

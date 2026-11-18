@@ -192,7 +192,22 @@
     "updateError": "Update failed: {{message}}",
     "appOutdated": "This pack needs a newer app ({{version}} or later).",
     "updateNotes": "Release notes",
-    "noPrevious": "No previous version to roll back to"
+    "noPrevious": "No previous version to roll back to",
+    "appUpdate": "App update",
+    "appUpdateDesc": "Check and install a new version of the app itself. The installer is verified with Tauri signatures; data pack updates do not change the app version.",
+    "appCurrentVersion": "Current app version",
+    "appLatestVersion": "Latest app version",
+    "appCheckUpdate": "Check app updates",
+    "appChecking": "Checking…",
+    "appUpToDate": "App is up to date",
+    "appNotChecked": "App update not checked yet",
+    "appAvailable": "New version {{version}} available",
+    "appInstall": "Download & install",
+    "appDownloading": "Downloading… {{percent}}%",
+    "appInstalling": "Installing; the app will exit and restart automatically…",
+    "appReady": "Installed. Restart the app to apply.",
+    "appRestart": "Restart app",
+    "appError": "App update failed: {{message}}"
   },
   "closePrompt": {
     "title": "Close window",
@@ -435,7 +450,9 @@
     "healer": "Healer",
     "shielder": "Shield",
     "labelValueSeparator": ": ",
-    "determinedInBattle": "Determined in battle"
+    "determinedInBattle": "Determined in battle",
+    "properties": "Properties",
+    "chapterLimit": "Chapter limit"
   },
   "currencyDetail": {
     "starLevel": "Star Level",

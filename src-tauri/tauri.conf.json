@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "星穹铁道数据库",
-  "version": "4.7.51",
+  "version": "4.8.0",
   "identifier": "com.hsr.local.databank",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -34,7 +34,16 @@
       }
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc4NDA2RjI0NkFDRTU0NDQKUldSRVZNNXFKRzlBZVBQYUxaTEF4QkU4R2Y4VTQ0MlJKRVM2K2xFZjlZUVpjYkU5NndrWHdnNzEK",
+      "endpoints": [
+        "https://github.com/AndBaichi/hsr-local/releases/download/app-latest/latest.json"
+      ]
+    }
+  },
   "bundle": {
+    "createUpdaterArtifacts": true,
     "active": true,
     "targets": ["nsis"],
     "icon": [

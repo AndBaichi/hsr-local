@@ -192,7 +192,22 @@
     "updateError": "업데이트 실패: {{message}}",
     "appOutdated": "이 데이터 팩은 더 새로운 앱({{version}} 이상)이 필요합니다.",
     "updateNotes": "업데이트 노트",
-    "noPrevious": "되돌릴 이전 버전이 없습니다"
+    "noPrevious": "되돌릴 이전 버전이 없습니다",
+    "appUpdate": "앱 업데이트",
+    "appUpdateDesc": "앱 자체의 새 버전을 확인하고 설치합니다. 설치 파일은 Tauri 서명으로 검증되며, 데이터 팩 업데이트는 앱 버전을 바꾸지 않습니다.",
+    "appCurrentVersion": "현재 앱 버전",
+    "appLatestVersion": "최신 앱 버전",
+    "appCheckUpdate": "앱 업데이트 확인",
+    "appChecking": "확인 중…",
+    "appUpToDate": "앱이 최신 상태입니다",
+    "appNotChecked": "앱 업데이트를 아직 확인하지 않음",
+    "appAvailable": "새 버전 {{version}} 사용 가능",
+    "appInstall": "다운로드 및 설치",
+    "appDownloading": "다운로드 중… {{percent}}%",
+    "appInstalling": "설치 중입니다. 앱이 자동으로 종료되고 다시 시작됩니다…",
+    "appReady": "설치 완료. 앱을 다시 시작하면 적용됩니다.",
+    "appRestart": "앱 다시 시작",
+    "appError": "앱 업데이트 실패: {{message}}"
   },
   "closePrompt": {
     "title": "창 닫기",
@@ -435,7 +450,9 @@
     "healer": "힐러",
     "shielder": "보호막",
     "labelValueSeparator": ": ",
-    "determinedInBattle": "전투 중 결정"
+    "determinedInBattle": "전투 중 결정",
+    "properties": "속성",
+    "chapterLimit": "챕터 제한"
   },
   "currencyDetail": {
     "starLevel": "별 레벨",

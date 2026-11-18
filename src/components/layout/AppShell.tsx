@@ -13,9 +13,11 @@ import { Outlet } from 'react-router-dom';
 import { ContextMenuHost, installContextMenuSuppression } from '@/components/common/ContextMenu';
 import { SideNav } from '@/components/layout/SideNav';
 import { TopBar } from '@/components/layout/TopBar';
+import { AppUpdateBanner } from '@/components/layout/AppUpdateBanner';
 import { UpdateBanner } from '@/components/layout/UpdateBanner';
 import { useSettingsStore } from '@/stores/settings';
 import { useUpdaterStore } from '@/stores/updater';
+import { useAppUpdaterStore } from '@/stores/appUpdater';
 import { LAYOUT } from '@/theme/tokens';
 
 /** 窄窗口媒体查询：`max-width: (breakpoint - 1)px` */
@@ -62,6 +64,7 @@ export function AppShell(): ReactNode {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void useUpdaterStore.getState().check(false);
+      void useAppUpdaterStore.getState().check(false);
     }, 10_000);
     return () => window.clearTimeout(timer);
   }, []);
@@ -78,6 +81,7 @@ export function AppShell(): ReactNode {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar />
+        <AppUpdateBanner />
         <UpdateBanner />
 
         <main className="hsr-backdrop min-h-0 flex-1 overflow-y-auto">

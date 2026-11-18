@@ -1,0 +1,89 @@
+name: Release app
+
+# 构建 Windows 安装包 + Tauri Updater 签名产物，并维护两个固定 Release：
+#  - v{version}     : 带安装包的历史发布（prerelease，避免抢数据包的 latest）
+#  - app-latest     : 只放 latest.json，供客户端固定端点检查
+#
+# 需要在仓库 Secrets 里配置：
+#  - TAURI_SIGNING_PRIVATE_KEY         私钥内容（~/.tauri/hsr-local.key 的全文）
+#  - TAURI_SIGNING_PRIVATE_KEY_PASSWORD 私钥密码（无密码则留空）
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: 更新说明（可空）
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: npm ci
+
+      - name: Build datapack (installer resource)
+        run: npm run datapack:full
+
+      - name: Check signing key
+        shell: pwsh
+        run: |
+          if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
+            throw "缺少 TAURI_SIGNING_PRIVATE_KEY Secret，无法生成签名更新包"
+          }
+
+      - name: Build signed installer
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: npx tauri build
+
+      - name: Prepare release assets
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $nsis = "src-tauri\target\release\bundle\nsis\星穹铁道数据库_${version}_x64-setup.exe"
+          if (-not (Test-Path $nsis)) { throw "找不到安装包: $nsis" }
+          $asset = "hsr-local_${version}_x64-setup.exe"
+          Copy-Item $nsis $asset
+          Copy-Item "$nsis.sig" "$asset.sig"
+          $url = "https://github.com/$env:GITHUB_REPOSITORY/releases/download/v${version}/${asset}"
+          node scripts/make-latest-json.mjs --installer $asset --signature "$asset.sig" --url $url --notes "${{ inputs.notes }}" --out latest.json
+
+      - name: Publish versioned release (prerelease)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $tag = "v$version"
+          if (-not (gh release view $tag 2>$null)) {
+            gh release create $tag --prerelease --title "应用 $version" --notes "应用安装包 $version"
+          }
+          gh release upload $tag "hsr-local_${version}_x64-setup.exe" "hsr-local_${version}_x64-setup.exe.sig" --clobber
+
+      - name: Publish updater manifest (app-latest)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          if (-not (gh release view app-latest 2>$null)) {
+            gh release create app-latest --prerelease --title "应用最新版（更新通道）" --notes "Tauri Updater 固定通道，仅含 latest.json"
+          }
+          gh release upload app-latest latest.json --clobber

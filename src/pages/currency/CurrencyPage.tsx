@@ -24,11 +24,11 @@ import { currencyBadges } from '@/components/currency/badges';
 import { RatingBadge } from '@/components/currency/RatingBadge';
 import { RoleCard } from '@/components/currency/RoleCard';
 import { SpotlightCard } from '@/components/currency/SpotlightCard';
+import { CurrencyDetail } from '@/components/currency/CurrencyDetail';
 import { TraitCard } from '@/components/currency/TraitCard';
 import { ErrorState } from '@/components/common/ErrorState';
 import { FilterBar, PagedGrid, type FilterDef } from '@/components/common/ListControls';
 import { MacroText } from '@/components/common/MacroText';
-import { expandGridFightInfo, replaceVariablePlaceholders } from '@/lib/text/gridfight';
 import { openEntityContextMenu } from '@/components/common/ContextMenu';
 import { SafeImage } from '@/components/common/SafeImage';
 import { SkeletonCardGrid } from '@/components/common/SkeletonBlock';
@@ -99,19 +99,6 @@ function openCurrencyMenu(
   openEntityContextMenu(currencyContextTarget(entry, kind, t), event);
 }
 
-/** 把任意值安全地压成可渲染文本；对象/数组走 JSON，绝不让 Object 进 React 子节点 */
-function safeStringify(value: unknown): string {
-  if (value === null) return 'null';
-  if (value === undefined) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
-  try {
-    return JSON.stringify(value, null, 2) ?? String(value);
-  } catch {
-    return String(value);
-  }
-}
-
 /** 字段是否「存在且非空」（空串 / 空数组 / 空对象 / null 都不展示） */
 function isNonEmpty(value: unknown): boolean {
   if (value === undefined || value === null) return false;
@@ -120,40 +107,6 @@ function isNonEmpty(value: unknown): boolean {
   if (typeof value === 'object') return Object.keys(value as object).length > 0;
   return true;
 }
-
-/** 详情字段的展示顺序（其余字段按对象键顺序补充在后面） */
-const DETAIL_ORDER: readonly string[] = [
-  'desc', 'simple_desc', 'remark',
-  'tag', 'tag_list', 'trait_list', 'recommend',
-  'effect', 'effect_list', 'layer',
-  'type', 'quality', 'category', 'category_id',
-  'param', 'param_list', 'rarity',
-  'front_back_type', 'is_expert', 'activation_type',
-  'charge_type', 'heal_or_shield_display', 'max_sp_icon',
-  'consumable_rule', 'if_stack', 'if_consume',
-  'chapter_limit_list', 'is_oc_effective', 'is_carry',
-  'bonus', 'icon_path',
-];
-
-/** 字段 → 已有 i18n key；未列出的字段用 schema 字段名作技术标签（不新增 key） */
-const LABEL_KEYS: Readonly<Record<string, string>> = {
-  id: 'currency.id',
-  rarity: 'currency.rarity',
-  quality: 'currency.quality',
-  type: 'currency.type',
-  category: 'currency.category',
-  category_id: 'currency.category',
-  param: 'currency.param',
-  param_list: 'currency.param',
-  effect: 'currency.effect',
-  effect_list: 'currency.effect',
-  tag: 'currency.tags',
-  tag_list: 'currency.tags',
-  recommend: 'currency.recommend',
-  simple_desc: 'currency.simpleDesc',
-  remark: 'currency.remark',
-  desc: 'detail.desc',
-};
 
 /** 只在字段确实存在取值时才出现的筛选项 */
 const FILTER_FIELDS = ['quality', 'category', 'rarity'] as const;
@@ -202,65 +155,6 @@ function useCardBadges(entry: CurrencyEntry): readonly string[] {
 }
 
 /** 单个字段值：字符串一律走 MacroText，其余安全 stringify */
-function FieldValue({
-  value,
-  params,
-  transform,
-}: {
-  readonly value: unknown;
-  readonly params: readonly number[];
-  /** 可选的宏文本预处理（主角光环详情用） */
-  readonly transform?: (value: string) => string;
-}): ReactNode {
-  if (typeof value === 'string') {
-    return <MacroText value={transform === undefined ? value : transform(value)} paramList={params} />;
-  }
-  return (
-    <pre className="whitespace-pre-wrap break-all font-mono text-xs text-dim">
-      {safeStringify(value)}
-    </pre>
-  );
-}
-
-/** layer：逐层展开，层内每个字符串（含 desc）都走 MacroText，null desc 自动略过 */
-function LayerValue({
-  value,
-  params,
-  transform,
-}: {
-  readonly value: unknown;
-  readonly params: readonly number[];
-  readonly transform?: (value: string) => string;
-}): ReactNode {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return <FieldValue value={value} params={params} transform={transform} />;
-  }
-  return (
-    <div className="flex flex-col gap-2">
-      {Object.entries(value as Record<string, unknown>).map(([level, layer]) => (
-        <div key={level} className="rounded-btn border border-line bg-elev p-2">
-          <div className="mb-1 font-mono text-[11px] text-dim">{level}</div>
-          {typeof layer === 'object' && layer !== null && !Array.isArray(layer) ? (
-            <div className="flex flex-col gap-1">
-              {Object.entries(layer as Record<string, unknown>)
-                .filter(([, fieldValue]) => isNonEmpty(fieldValue))
-                .map(([field, fieldValue]) => (
-                  <div key={field} className="flex flex-wrap items-start gap-x-2 gap-y-0.5">
-                    <span className="shrink-0 font-mono text-[11px] text-dim">{field}</span>
-                    <FieldValue value={fieldValue} params={params} transform={transform} />
-                  </div>
-                ))}
-            </div>
-          ) : (
-            <FieldValue value={layer} params={params} transform={transform} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* 卡片与详情                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -364,96 +258,6 @@ function EntryCardButton({
 }
 
 /** 页内详情面板内容：所有额外字段按存在与否展示 */
-function EntryDetail({
-  entry,
-  kind,
-  onClose,
-  infoLabelOf,
-}: {
-  readonly entry: CurrencyEntry;
-  readonly kind: CurrencyKind;
-  readonly onClose: () => void;
-  readonly infoLabelOf?: (type: string, id: string) => string | undefined;
-}): ReactNode {
-  const { t } = useTranslation();
-  const localize = (value: string): string =>
-    replaceVariablePlaceholders(
-      expandGridFightInfo(value, infoLabelOf),
-      t('currency.determinedInBattle') as string,
-    );
-  const params = currencyParams(entry);
-  const id = String(entry.id);
-  const badges = useCardBadges(entry);
-  // 详情标题与卡片共用同一个显示名入口（帕姆王 / 开拓者的特例都在里面）
-  const name = currencyDisplayName(entry, kind, t);
-
-  const labelOf = (key: string): string => {
-    const mapped = LABEL_KEYS[key];
-    return mapped ? (t(mapped as 'currency.id') as string) : key;
-  };
-
-  const keys = useMemo(
-    () => [
-      ...DETAIL_ORDER.filter((key) => isNonEmpty(entry[key])),
-      ...Object.keys(entry).filter(
-        (key) => key !== 'id' && key !== 'name' && !DETAIL_ORDER.includes(key) && isNonEmpty(entry[key]),
-      ),
-    ],
-    [entry],
-  );
-
-  const hasDesc = isNonEmpty(entry.desc) || isNonEmpty(entry.simple_desc);
-
-  return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <MacroText value={name} paramList={params} className="font-semibold text-ink" />
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-dim">#{id}</span>
-            {/* 详情里也能改评级：看完内容顺手定档，不必退回列表。两套并排，tier 在左 */}
-            <RatingBadge kind={kind} id={id} size="md" variant="tier" />
-            <RatingBadge kind={kind} id={id} size="md" />
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="shrink-0 rounded-btn border border-line bg-elev px-2.5 py-1 text-xs text-dim hover:text-ink"
-        >
-          {t('common.close') as string}
-        </button>
-      </div>
-
-      {badges.length > 0 ? (
-        <div className="flex flex-wrap gap-1">
-          {badges.map((badge) => (
-            <span key={badge} className="rounded-tag border border-line bg-elev px-1.5 py-[1px] text-[11px] text-dim">
-              {badge}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {!hasDesc ? <p className="text-xs text-dim">{t('currency.noDesc') as string}</p> : null}
-
-      <div className="flex flex-col gap-3">
-        {keys.map((key) => (
-          <div key={key} className="flex flex-col gap-1 border-t border-line pt-2">
-            <div className="text-xs font-semibold text-dim">{labelOf(key)}</div>
-            {key === 'layer' ? (
-              <LayerValue value={entry[key]} params={params} transform={localize} />
-            ) : (
-              <FieldValue value={entry[key]} params={params} transform={localize} />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* 三段视图                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -622,6 +426,10 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
     () => new Map(traitEntries.map((entry) => [String(entry.id), entry])),
     [traitEntries],
   );
+  const selectedTrait =
+    selected !== null && typeof selected.trait_id === 'number' && selected.trait_id > 0
+      ? traitById.get(String(selected.trait_id))
+      : undefined;
   /**
    * 推荐角色的显示名：查不到角色条目时回退 id（绝不渲染空标签）。
    * 查到的条目走统一显示名入口，所以 `800902` 会显示成开拓者、`604202` 会显示成帕姆王。
@@ -930,13 +738,15 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
           role="presentation"
         >
           <div
-            className="hsr-panel max-h-[85vh] w-full max-w-2xl overflow-auto rounded-card border border-line p-5"
+            className="hsr-panel max-h-[85vh] w-full max-w-3xl overflow-auto rounded-card border border-line p-5"
             onClick={(event) => event.stopPropagation()}
             role="presentation"
           >
-            <EntryDetail
+            <CurrencyDetail
               entry={selected}
               kind={kind}
+              trait={selectedTrait}
+              roleLabelOf={roleLabelOf}
               infoLabelOf={infoLabelOf}
               onClose={() => setSelected(null)}
             />
