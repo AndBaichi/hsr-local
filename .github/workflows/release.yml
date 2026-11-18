@@ -43,6 +43,8 @@ jobs:
 
       - name: Check signing key
         shell: pwsh
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         run: |
           if (-not $env:TAURI_SIGNING_PRIVATE_KEY) {
             throw "缺少 TAURI_SIGNING_PRIVATE_KEY Secret，无法生成签名更新包"
