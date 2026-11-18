@@ -639,7 +639,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包 | `src-tauri/target/release/bundle/nsis/星穹铁道数据库_4.8.0_x64-setup.exe` |
+| 安装包（CI 发布资产） | Release `v4.8.0` 的 `hsr-local_4.8.0_x64-setup.exe` |
 | 体积 | **85,423,221 B**（81.47 MiB），2026-11-19 06:31（GitHub Actions / 4.8.0 构建） |
 | SHA-256 | `91abe54dc92575ff334c9c9775f34a4e5bc04ca2f7d10de6172996ddc9d816c3` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
@@ -723,7 +723,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`星穹铁道数据库_4.8.0_x64-setup.exe`，85,423,221 B（81.47 MiB），
+- 当前安装包（CI 发布资产）：`hsr-local_4.8.0_x64-setup.exe`，85,423,221 B（81.47 MiB），
   SHA-256 `91abe54dc92575ff334c9c9775f34a4e5bc04ca2f7d10de6172996ddc9d816c3`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
