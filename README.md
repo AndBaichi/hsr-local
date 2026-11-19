@@ -640,8 +640,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 | 项 | 值 |
 |---|---|
 | 安装包（发布资产） | Release `v4.8.1` 的 `hsr-local_4.8.1_x64-setup.exe` |
-| 体积 | **86,257,041 B**（82.26 MiB），2026-11-19 20:31（4.8.1 构建） |
-| SHA-256 | `7751ce01d1c4cbf0924318c37234c76cd1e8ae67922971d54cb1889cb4d069d9` |
+| 体积 | **85,423,226 B**（81.47 MiB），2026-11-19 20:48（GitHub Actions / 4.8.1 构建） |
+| SHA-256 | `93d3100a66bf8f5771d53c15574dc106f8dff7eb40181f33365b9fa786abb8e1` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 78,089,853 B / **7359** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `44c475dfcca29ef80343e776cee66f63869d4c12831570d5c1d2844ffebe4715` |
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.1_x64-setup.exe`，86,257,041 B（82.26 MiB），
-  SHA-256 `7751ce01d1c4cbf0924318c37234c76cd1e8ae67922971d54cb1889cb4d069d9`
+- 当前安装包：`hsr-local_4.8.1_x64-setup.exe`，85,423,226 B（81.47 MiB），
+  SHA-256 `93d3100a66bf8f5771d53c15574dc106f8dff7eb40181f33365b9fa786abb8e1`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
