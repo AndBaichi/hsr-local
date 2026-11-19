@@ -452,7 +452,8 @@
     "labelValueSeparator": "：",
     "determinedInBattle": "戦闘中に決定",
     "properties": "プロパティ",
-    "chapterLimit": "章制限"
+    "chapterLimit": "章制限",
+    "chapter": "章"
   },
   "currencyDetail": {
     "starLevel": "星レベル",

@@ -452,7 +452,8 @@
     "labelValueSeparator": ": ",
     "determinedInBattle": "전투 중 결정",
     "properties": "속성",
-    "chapterLimit": "챕터 제한"
+    "chapterLimit": "챕터 제한",
+    "chapter": "챕터"
   },
   "currencyDetail": {
     "starLevel": "별 레벨",

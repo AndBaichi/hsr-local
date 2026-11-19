@@ -23,6 +23,8 @@ import { EntityGrid, RarityStars } from '@/components/common/EntityGrid';
 import { currencyBadges } from '@/components/currency/badges';
 import { RatingBadge } from '@/components/currency/RatingBadge';
 import { RoleCard } from '@/components/currency/RoleCard';
+import { AugmentCard } from '@/components/currency/AugmentCard';
+import { expandGridFightInfo } from '@/lib/text/gridfight';
 import { SpotlightCard } from '@/components/currency/SpotlightCard';
 import { CurrencyDetail } from '@/components/currency/CurrencyDetail';
 import { TraitCard } from '@/components/currency/TraitCard';
@@ -172,10 +174,12 @@ function EntryCardButton({
   entry,
   kind,
   onOpen,
+  infoLabelOf,
 }: {
   readonly entry: CurrencyEntry;
   readonly kind: CurrencyKind;
   readonly onOpen: () => void;
+  readonly infoLabelOf?: (type: string, id: string) => string | undefined;
 }): ReactNode {
   const { t } = useTranslation();
   // 钩子必须先无条件调用（下面的 kind 分支会提前 return，条件调用会让 hook 顺序变化）
@@ -200,14 +204,28 @@ function EntryCardButton({
     );
   }
 
+  if (kind === 'augment') {
+    return (
+      <AugmentCard
+        entry={entry}
+        onOpen={onOpen}
+        actions={actions}
+        infoLabelOf={infoLabelOf}
+        onContextMenu={(event) => openCurrencyMenu(entry, kind, t, event)}
+      />
+    );
+  }
+
   const params = currencyParams(entry);
   const candidates = currencyIconCandidates(entry, kind);
   const alt = currencyDisplayName(entry, kind, t);
-  const preview = isNonEmpty(entry.desc)
+  const rawPreview = isNonEmpty(entry.desc)
     ? entry.desc
     : isNonEmpty(entry.simple_desc)
       ? entry.simple_desc
       : undefined;
+  const preview =
+    typeof rawPreview === 'string' ? expandGridFightInfo(rawPreview, infoLabelOf) : rawPreview;
 
   return (
     <div className="relative">
@@ -328,7 +346,7 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
   const [itemEntries, setItemEntries] = useState<readonly CurrencyEntry[]>([]);
   const needsRoles = kind === 'trait' || kind === 'spotlight';
   const needsTraits = kind === 'spotlight';
-  const needsItems = kind === 'spotlight';
+  const needsItems = kind !== 'role';
   // 本图鉴是否已经评过任何一条：评过就不再提示"点徽标可评级"，提示只在首次出现
   const ratedHere = useRatingsStore((state) =>
     Object.keys(state.items).some((key) => key.startsWith(`currency:${kind}:`)),
@@ -718,6 +736,7 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
                 <EntryCardButton
                   entry={entry}
                   kind={kind}
+                  infoLabelOf={infoLabelOf}
                   onOpen={() => {
                     // 角色有独立详情页（原站 `/currency/role/:id`），其余图鉴仍是页内弹层：
                     // 装备 / 增益这类条目字段少，弹层够用，没必要为它们各开一条路由。

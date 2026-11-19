@@ -452,7 +452,8 @@
     "labelValueSeparator": "：",
     "determinedInBattle": "战斗中决定",
     "properties": "属性",
-    "chapterLimit": "章节限制"
+    "chapterLimit": "章节限制",
+    "chapter": "章节"
   },
   "currencyDetail": {
     "starLevel": "星级",

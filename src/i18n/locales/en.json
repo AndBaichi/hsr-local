@@ -452,7 +452,8 @@
     "labelValueSeparator": ": ",
     "determinedInBattle": "Determined in battle",
     "properties": "Properties",
-    "chapterLimit": "Chapter limit"
+    "chapterLimit": "Chapter limit",
+    "chapter": "Chapter"
   },
   "currencyDetail": {
     "starLevel": "Star Level",
