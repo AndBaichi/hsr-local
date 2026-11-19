@@ -35,6 +35,7 @@ import { RarityStars } from '@/components/common/EntityGrid';
 import { NewsCard } from '@/components/home/NewsCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { dal } from '@/lib/data/dal';
+import { compareVersions } from '@/lib/update/manifest';
 import { getDiffBundle, type DiffItem } from '@/lib/data/extra';
 import type { CharacterBrief, LightconeBrief } from '@/lib/data/types';
 import { elementIconPath, pathIconPath } from '@/lib/format';
@@ -43,6 +44,7 @@ import { useNewsFeeds } from '@/lib/news/useNewsFeeds';
 import { pickName } from '@/lib/userdata/types';
 import { sortedFavorites, useFavoritesStore } from '@/stores/favorites';
 import { useSettingsStore } from '@/stores/settings';
+import { useUpdaterStore } from '@/stores/updater';
 
 /** 新增条目状态：未加载 / 加载中 / 已加载 */
 interface NewItems {
@@ -313,6 +315,17 @@ export default function HomePage(): ReactNode {
   const versionBadge =
     bootInfo === undefined ? undefined : `${t('common.version')} ${bootInfo.gameVersion}`;
 
+  // 首页「最新数据版本」优先用远端 manifest 看到的版本：
+  // 数据包还没更新时，diff.toVersion 仍是旧版本，不能代表“最新”。
+  const latestKnownVersion = useUpdaterStore((state) => state.latestVersion);
+  const latestCandidates = [newItems.toVersion, latestKnownVersion, bootInfo?.gameVersion].filter(
+    (value): value is string => typeof value === 'string' && value !== '',
+  );
+  const latestDataVersion = latestCandidates.reduce<string | undefined>(
+    (best, value) => (best === undefined || compareVersions(value, best) > 0 ? value : best),
+    undefined,
+  );
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title={t('home.title')} badge={versionBadge} />
@@ -324,7 +337,7 @@ export default function HomePage(): ReactNode {
         <div className="grid gap-4 sm:grid-cols-2">
           <VersionCard
             label={t('home.latestVersion')}
-            value={newItems.toVersion ?? '—'}
+            value={latestDataVersion ?? '—'}
             accent
           />
           <VersionCard

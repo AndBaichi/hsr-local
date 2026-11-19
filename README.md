@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.1` 的 `hsr-local_4.8.1_x64-setup.exe` |
-| 体积 | **85,423,226 B**（81.47 MiB），2026-11-19 20:48（GitHub Actions / 4.8.1 构建） |
-| SHA-256 | `93d3100a66bf8f5771d53c15574dc106f8dff7eb40181f33365b9fa786abb8e1` |
+| 安装包（发布资产） | Release `v4.8.2` 的 `hsr-local_4.8.2_x64-setup.exe` |
+| 体积 | **86,257,553 B**（82.26 MiB），2026-11-19 22:03（4.8.2 构建） |
+| SHA-256 | `be2e5c4ed4a484d8760c69f375d0966d4c9fdc73c58837285abffb8f2dc3dc8b` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 78,089,853 B / **7359** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `44c475dfcca29ef80343e776cee66f63869d4c12831570d5c1d2844ffebe4715` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.21，应用版本 4.8.1）
+## 7. 客户端更新（v2.21，应用版本 4.8.2）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.1_x64-setup.exe`，85,423,226 B（81.47 MiB），
-  SHA-256 `93d3100a66bf8f5771d53c15574dc106f8dff7eb40181f33365b9fa786abb8e1`
+- 当前安装包：`hsr-local_4.8.2_x64-setup.exe`，86,257,553 B（82.26 MiB），
+  SHA-256 `be2e5c4ed4a484d8760c69f375d0966d4c9fdc73c58837285abffb8f2dc3dc8b`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -744,7 +744,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 实测角色图鉴 4 张「银狼LV.999」卡显示正常，页面内 `<unbreak>` 计数 0。
 ### 7.8 应用本体更新（Tauri Updater，v2.21）
 
-- 应用版本已与数据版本解耦：程序 **4.8.1**；安装包内置数据 4.7.51，数据更新通道已到 **4.7.52**。
+- 应用版本已与数据版本解耦：程序 **4.8.2**；安装包内置数据 4.7.51，数据更新通道已到 **4.7.52**。
 - 端点固定为 `https://github.com/AndBaichi/hsr-local/releases/download/app-latest/latest.json`；
   `app-latest` 是 **prerelease**，不会抢数据包使用的 `releases/latest`。
 - 安装包由 Tauri 生成 minisign 签名（`*.exe.sig`），`latest.json` 里带签名；
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.1`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.8.2`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（内置安装包仍是 4.7.51；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -784,3 +784,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 通用卡片此前把描述压成两行、不显示章节，并把 `<gridfightinfo>` 物品引用吞成 `【】`。
 - 新增 `AugmentCard`：完整描述、品质文本、章节行；同时给所有非角色图鉴的通用卡片接上 `expandGridFightInfo`，`currency/item.json` 的物品名解析对投资策略 / 投资环境 / 装备同样生效。
 - 实测 411 张投资策略卡：`阿哈大悦` 显示「获得1个【简易武装箱】」、`开源节流` 显示「章节：1」，页面 `【】` 计数 0。
+### 7.13 首页「最新数据版本」对齐（v2.26 / 4.8.2）
+
+- 问题：首页的「最新数据版本」读的是当前数据包 `diff.toVersion`；当数据包还是 4.7.51 时，即使远端已发布 4.7.52，卡片仍显示 4.7.51。
+- 修法：数据更新 store 把最近一次 manifest 的 `gameVersion` 持久化到 `hsr.update.latestVersion`；首页取 `diff.toVersion` / 已保存的远端版本 / 当前生效包版本三者中的最大值。
+- 旧版本升级上来时本地还没有 `latestVersion`，即使 24h 内检查过也会补查一次；实测首页显示「最新数据版本 4.7.52」。

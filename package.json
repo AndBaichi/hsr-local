@@ -1,7 +1,7 @@
 {
   "name": "hsr-local",
   "private": true,
-  "version": "4.8.1",
+  "version": "4.8.2",
   "type": "module",
   "description": "星穹数据库 · 本地版 —— 完全离线的崩坏：星穹铁道本地资料库",
   "license": "MIT",

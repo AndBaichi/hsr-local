@@ -43,3 +43,7 @@ _attic/
 
 # 由构建/发布脚本生成
 latest.json
+
+# 发布脚本生成在仓库根目录的安装包副本（不入库）
+hsr-local_*-setup.exe
+hsr-local_*-setup.exe.sig

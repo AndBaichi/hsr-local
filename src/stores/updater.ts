@@ -30,6 +30,9 @@ import { useSettingsStore } from '@/stores/settings';
 /** 最近一次检查时间（localStorage，避免每次启动都打网络） */
 const LAST_CHECK_KEY = 'hsr.update.lastCheckAt';
 
+/** 最近一次从远端看到的游戏数据版本（跨重启保留，供首页展示） */
+const LATEST_VERSION_KEY = 'hsr.update.latestVersion';
+
 /** 自动检查间隔：24 小时 */
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -78,6 +81,8 @@ interface UpdateState {
   total: number;
   /** 最近一次检查完成时间（毫秒） */
   lastCheckedAt?: number;
+  /** 最近一次从远端 manifest 看到的游戏数据版本 */
+  latestVersion?: string;
   /** 用户忽略过的版本（banner 不再提示） */
   dismissedVersion?: string;
   /** 是否存在可回滚的上一版 */
@@ -102,6 +107,23 @@ function readLastCheck(): number | undefined {
   const raw = window.localStorage.getItem(LAST_CHECK_KEY);
   const value = raw === null ? NaN : Number(raw);
   return Number.isFinite(value) ? value : undefined;
+}
+
+/** 读取最近一次远端数据版本 */
+function readLatestVersion(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const value = window.localStorage.getItem(LATEST_VERSION_KEY);
+  return value === null || value.trim() === '' ? undefined : value;
+}
+
+/** 写入最近一次远端数据版本 */
+function writeLatestVersion(value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(LATEST_VERSION_KEY, value);
+  } catch {
+    // 忽略存储失败
+  }
 }
 
 /** 写入上次检查时间 */
@@ -135,12 +157,15 @@ export const useUpdaterStore = create<UpdateState>((set, get) => ({
   downloaded: 0,
   total: 0,
   lastCheckedAt: readLastCheck(),
+  latestVersion: readLatestVersion(),
   hasPrevious: false,
 
   check: async (manual = false) => {
     const state = get();
     if (isBusy(state.phase)) return;
-    if (!manual && state.lastCheckedAt !== undefined) {
+    // 有 lastCheckedAt 但没有 latestVersion：说明是旧版本升级上来的，
+    // 本地还没存过“远端最新版本”；即使 24h 内检查过也补查一次，首页才能对上。
+    if (!manual && state.lastCheckedAt !== undefined && state.latestVersion !== undefined) {
       if (Date.now() - state.lastCheckedAt < CHECK_INTERVAL_MS) return;
     }
 
@@ -156,6 +181,8 @@ export const useUpdaterStore = create<UpdateState>((set, get) => ({
       const appVersion = await getVersion().catch(() => '');
       const checkedAt = Date.now();
       writeLastCheck(checkedAt);
+      writeLatestVersion(manifest.gameVersion);
+      set({ latestVersion: manifest.gameVersion });
 
       if (appVersion !== '' && compareVersions(manifest.minAppVersion, appVersion) > 0) {
         set({ phase: 'app-outdated', manifest, lastCheckedAt: checkedAt });
