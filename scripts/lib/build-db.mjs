@@ -22,6 +22,7 @@ import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import {
+  BASELINE_VERSION,
   CACHE_DIR,
   DB_DIR,
   DEFAULT_LANGUAGE,
@@ -345,7 +346,12 @@ export async function stageBuild(log) {
   const countChecks = {};
   for (const [key, expected] of Object.entries(EXPECTED)) {
     if (key === 'droppedTextIdEntries') continue;
-    countChecks[key] = { actual: counts[key] ?? null, expected, ok: counts[key] === expected };
+    const baseline = VERSION === BASELINE_VERSION;
+    countChecks[key] = {
+      actual: counts[key] ?? null,
+      expected: baseline ? expected : 'new-version',
+      ok: !baseline || counts[key] === expected,
+    };
   }
 
   /* ---------------- meta.json ---------------- */

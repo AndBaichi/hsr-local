@@ -15,6 +15,7 @@ import { appendFile, mkdir } from 'node:fs/promises';
 
 import {
   CACHE_DIR,
+  BASELINE_VERSION,
   EXPECTED,
   LANGUAGES,
   LIST_FILES,
@@ -76,7 +77,8 @@ async function stageLists() {
   for (const file of LIST_FILES) {
     const buffer = await fetchToCache(file.path, `${ORIGIN}${file.path}`);
     const actualBytes = buffer.byteLength;
-    const ok = actualBytes === file.bytes;
+    // 4.7.51 之后上游文件会正常变化；新版本只做结构校验，不再拿基线字节卡死。
+    const ok = actualBytes === file.bytes || VERSION !== BASELINE_VERSION;
     result.set(file.key, { key: file.key, path: file.path, bytes: actualBytes, expectedBytes: file.bytes, ok });
     if (!ok) {
       await log(`  ✗ ${file.path} 字节数不符：实际 ${actualBytes}，期望 ${file.bytes}`);

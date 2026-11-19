@@ -9,7 +9,7 @@
  * 与架构文档 §3.2「四语言合并」不同，以主理人指令为准。
  */
 
-import { LIST_FILES, LANGUAGES, ORIGIN } from './consts.mjs';
+import { LIST_FILES, LANGUAGES, ORIGIN, VERSION, BASELINE_VERSION } from './consts.mjs';
 import { createLimiter, fetchToCache, readCachedJson } from './http.mjs';
 import { HTTP } from './consts.mjs';
 
@@ -59,7 +59,7 @@ export async function stageDetails(log) {
   for (const [family, listKey] of Object.entries(FAMILY_LIST_KEY)) {
     const ids = await idsForList(listKey);
     const expected = EXPECTED_PER_LANG[family];
-    if (ids.length !== expected) {
+    if (VERSION === BASELINE_VERSION && ids.length !== expected) {
       throw new Error(`列表 ${listKey} 实体数 ${ids.length} ≠ 期望 ${expected}`);
     }
     for (const lang of LANGUAGES) {
@@ -106,7 +106,7 @@ export async function stageDetails(log) {
 
   const counts = {};
   for (const family of Object.keys(FAMILY_LIST_KEY)) {
-    counts[family] = EXPECTED_PER_LANG[family] * LANGUAGES.length;
+    counts[family] = tasks.filter((task) => task.family === family).length;
   }
 
   await log(`  ✓ 详情全部就绪，共 ${tasks.length} 个文件，${(bytes / 1048576).toFixed(1)}MB`);
