@@ -744,7 +744,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 实测角色图鉴 4 张「银狼LV.999」卡显示正常，页面内 `<unbreak>` 计数 0。
 ### 7.8 应用本体更新（Tauri Updater，v2.21）
 
-- 应用版本已与数据版本解耦：程序 **4.8.0**，数据包仍 4.7.51。
+- 应用版本已与数据版本解耦：程序 **4.8.0**；安装包内置数据 4.7.51，数据更新通道已到 **4.7.52**。
 - 端点固定为 `https://github.com/AndBaichi/hsr-local/releases/download/app-latest/latest.json`；
   `app-latest` 是 **prerelease**，不会抢数据包使用的 `releases/latest`。
 - 安装包由 Tauri 生成 minisign 签名（`*.exe.sig`），`latest.json` 里带签名；
@@ -765,5 +765,16 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 ### 7.10 版本与分支
 
 - 应用版本：`4.8.0`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
-- 数据版本：`4.7.51`（由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
+- 数据版本：当前 `4.7.52`（内置安装包仍是 4.7.51；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
+### 7.11 数据 4.7.52（v2.24）
+
+- 上游 `hsr.nanoka.cc` 已到 **4.7.52**；4.7.51 的硬编码字节/计数断言曾让定时任务失败。
+- 构建脚本新增 `BASELINE_VERSION = '4.7.51'`：
+  - 4.7.51 仍做精确字节/计数断言（基线保护）；
+  - 新版本只做结构校验，详情文件数、图片数、计数按实际值记录，不再阻止构建。
+- 已发布数据包 `datapack-4.7.52`：
+  - `hsr-local-4.7.52.hsrpack` 74,517,417 B / 7,360 条目
+  - SHA-256 `aaf8804638eaff6c7c280b09bdd699b42318ba6b83ef99125c250e1e747a7c89`
+  - `update.json` 的 `minAppVersion = 4.8.0`
+- 应用 4.8.0 已实测可安装 4.7.52 并正常读取 101 角色；旧 4.7.51 客户端会提示“需要更新应用”（没有应用更新器，需手动装 4.8.0）。
