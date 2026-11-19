@@ -40,6 +40,11 @@ jobs:
         env:
           HSR_VERSION: 4.7.51
         run: npm run datapack:full
+      - name: Prepare builtin datapack
+        env:
+          HSR_VERSION: 4.7.51
+        run: npm run builtin:pack
+
       - name: Run selftest against real datapack
         env:
           HSR_SELFTEST_PACK: data/datapack
