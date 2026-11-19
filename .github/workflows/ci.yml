@@ -37,6 +37,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - name: Build datapack
+        env:
+          HSR_VERSION: 4.7.51
         run: npm run datapack:full
       - name: Run selftest against real datapack
         env:

@@ -13,7 +13,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(HERE, '..', '..');
 
 /** 数据源版本（唯一出现版本号的地方是设置页/关于页展示，运行期零网络） */
-export const VERSION = (process.env.HSR_VERSION ?? '4.7.51').trim();
+export const VERSION = (process.env.HSR_VERSION ?? '4.7.52').trim();
 
 /** 硬编码字节/计数断言对应的基线版本；新版本只做结构校验 */
 export const BASELINE_VERSION = '4.7.51';

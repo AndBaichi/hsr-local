@@ -32,10 +32,10 @@ use crate::error::AppError;
 use crate::paths;
 
 /// 内置数据包的稳定 id（与 `data/datapack/meta.json` 的 `packId` 一致）
-pub const BUILTIN_PACK_ID: &str = "hsr-4.7.51-local";
+pub const BUILTIN_PACK_ID: &str = env!("HSR_BUILTIN_PACK_ID");
 
 /// 内置数据包文件名（与 `src-tauri/tauri.conf.json` 的 `bundle.resources` 一致）
-pub const BUILTIN_PACK_FILE: &str = "hsr-local-4.7.51.hsrpack";
+pub const BUILTIN_PACK_FILE: &str = "hsr-local-builtin.hsrpack";
 
 /// 应用能读的 `meta.schemaVersion`
 ///
@@ -785,10 +785,13 @@ where
 
     // 4. 校验产物（这一步在 rename 之前，失败只会留下 .tmp）
     let meta = read_meta(&staging)?;
-    if let Some(mismatch) = counts_mismatch(&meta.counts) {
-        return Err(AppError::pack_corrupt(format!(
-            "数据包内容不完整：{mismatch}"
-        )));
+    // 基线 4.7.51 仍做精确计数校验；新版本内置包计数随版本变化，只校验 schema/形状。
+    if meta.game_version == "4.7.51" {
+        if let Some(mismatch) = counts_mismatch(&meta.counts) {
+            return Err(AppError::pack_corrupt(format!(
+                "数据包内容不完整：{mismatch}"
+            )));
+        }
     }
     if meta.pack_id != BUILTIN_PACK_ID {
         return Err(AppError::pack_corrupt(format!(

@@ -616,7 +616,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - **路径口径**：Tauri CLI 不传 `--target` 时按 host 三元组构建，产物落在
   `src-tauri/target/release/`；`src-tauri/target/x86_64-pc-windows-gnu/release/` **并不存在**。
   主二进制实际名为 `hsr-local.exe`，「星穹铁道数据库」只是产品名。
-- 数据包 `hsr-local-4.7.51.hsrpack`（**7359 条目 / 78,089,854 B**）通过
+- 数据包 `hsr-local-builtin.hsrpack`（**4.7.52 / 7360 条目 / 78,089,856 B**）通过
   `tauri.conf.json` 的 `bundle.resources` 随安装包嵌入，运行期首启由 `src-tauri/src/pack.rs` 展开。
 - **联网时机要分清两段，别混为一谈**：
   ① **安装期（条件触发）**：`webviewInstallMode = downloadBootstrapper` 下，安装包**不内嵌**
@@ -639,13 +639,13 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.2` 的 `hsr-local_4.8.2_x64-setup.exe` |
-| 体积 | **86,257,553 B**（82.26 MiB），2026-11-19 22:03（4.8.2 构建） |
-| SHA-256 | `be2e5c4ed4a484d8760c69f375d0966d4c9fdc73c58837285abffb8f2dc3dc8b` |
+| 安装包（发布资产） | Release `v4.8.3` 的 `hsr-local_4.8.3_x64-setup.exe` |
+| 体积 | **86,258,072 B**（82.26 MiB），2026-11-19 23:00（4.8.3 构建） |
+| SHA-256 | `c5d97de28dd123372d3a50af5dd75e9d77a4534731640c1d6c2dd574f61e7ff9` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
-| 内嵌数据包 | 78,089,853 B / **7359** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `44c475dfcca29ef80343e776cee66f63869d4c12831570d5c1d2844ffebe4715` |
-| 内嵌证据 | `src-tauri/target/release/nsis/x64/installer.nsi:690` 的 `File /a "/oname=hsr-local-4.7.51.hsrpack"`；暂存副本与根目录 `.hsrpack` SHA-256 完全一致 |
+| 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
+| 内嵌证据 | `tauri.conf.json` 资源固定为 `hsr-local-builtin.hsrpack`；包 id 由 `src-tauri/builtin-pack-id.txt` 注入 |
 | 构建日志 | 成功日志 61 行，0 条 WARN/ERROR |
 
 > 发布说明（如实记录，未擅自改动配置）：
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.21，应用版本 4.8.2）
+## 7. 客户端更新（v2.27，应用版本 4.8.3）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.2_x64-setup.exe`，86,257,553 B（82.26 MiB），
-  SHA-256 `be2e5c4ed4a484d8760c69f375d0966d4c9fdc73c58837285abffb8f2dc3dc8b`
+- 当前安装包：`hsr-local_4.8.3_x64-setup.exe`，86,258,072 B（82.26 MiB），
+  SHA-256 `c5d97de28dd123372d3a50af5dd75e9d77a4534731640c1d6c2dd574f61e7ff9`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,8 +764,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.2`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
-- 数据版本：当前 `4.7.52`（内置安装包仍是 4.7.51；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
+- 应用版本：`4.8.3`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
 
@@ -789,3 +789,12 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 问题：首页的「最新数据版本」读的是当前数据包 `diff.toVersion`；当数据包还是 4.7.51 时，即使远端已发布 4.7.52，卡片仍显示 4.7.51。
 - 修法：数据更新 store 把最近一次 manifest 的 `gameVersion` 持久化到 `hsr.update.latestVersion`；首页取 `diff.toVersion` / 已保存的远端版本 / 当前生效包版本三者中的最大值。
 - 旧版本升级上来时本地还没有 `latestVersion`，即使 24h 内检查过也会补查一次；实测首页显示「最新数据版本 4.7.52」。
+### 7.14 安装包直接内置最新数据（v2.27 / 4.8.3）
+
+- 4.8.3 起安装包内置 **4.7.52** 数据包，装完不用再单独下 74 MB。
+- Tauri 资源文件名固定为 `hsr-local-builtin.hsrpack`，由 `scripts/prepare-builtin-pack.mjs` 从
+  `hsr-local-{HSR_VERSION}.hsrpack` 复制，并把 `meta.packId` 写入 `src-tauri/builtin-pack-id.txt`。
+- `build.rs` 把 pack id 注入 `HSR_BUILTIN_PACK_ID`，Rust 不再硬编码 `hsr-4.7.51-local`；
+  内置包计数校验只对 4.7.51 基线，后续版本按实际计数。
+- 实测：旧的 4.7.51 客户端升级到 4.8.3 后，首次启动自动展开内置 4.7.52，首页显示
+  「数据版本 4.7.52 / 最新数据版本 4.7.52」。

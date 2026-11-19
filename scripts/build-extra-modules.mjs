@@ -20,7 +20,7 @@
 import { mkdir, stat, writeFile, readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
-const VERSION = (process.env.HSR_VERSION ?? '4.7.51').trim();
+const VERSION = (process.env.HSR_VERSION ?? '4.7.52').trim();
 const STATIC = `https://static.nanoka.cc/hsr/${VERSION}`;
 const ASSETS = 'https://static.nanoka.cc/assets/hsr';
 const LANGS = ['zh', 'en', 'ja', 'ko'];

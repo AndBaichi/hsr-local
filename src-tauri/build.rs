@@ -7,6 +7,17 @@
 //!    `ld.exe: .rsrc merge failure: multiple non-default manifests` —— 见 src-tauri/windows-app.manifest）
 
 fn main() {
+    // 内置数据包 id 由 scripts/prepare-builtin-pack.mjs 写入；没有文件时回落到基线。
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".to_string());
+    let id_path = std::path::Path::new(&manifest_dir).join("builtin-pack-id.txt");
+    let pack_id = std::fs::read_to_string(&id_path)
+        .ok()
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "hsr-4.7.51-local".to_string());
+    println!("cargo:rustc-env=HSR_BUILTIN_PACK_ID={pack_id}");
+    println!("cargo:rerun-if-changed=builtin-pack-id.txt");
+
     #[cfg(windows)]
     {
         let attributes = tauri_build::Attributes::new().windows_attributes(

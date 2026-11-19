@@ -1,7 +1,7 @@
 {
   "name": "hsr-local",
   "private": true,
-  "version": "4.8.2",
+  "version": "4.8.3",
   "type": "module",
   "description": "星穹数据库 · 本地版 —— 完全离线的崩坏：星穹铁道本地资料库",
   "license": "MIT",
@@ -20,9 +20,10 @@
     "update:manifest": "node scripts/make-update-manifest.mjs",
     "tauri": "node scripts/with-mingw.mjs tauri",
     "tauri:dev": "node scripts/with-mingw.mjs tauri dev",
-    "tauri:build": "node scripts/with-mingw.mjs tauri build",
+    "tauri:build": "node scripts/prepare-builtin-pack.mjs && node scripts/with-mingw.mjs tauri build",
     "selftest": "cd src-tauri && node ../scripts/with-mingw.mjs cargo run --bin selftest",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "builtin:pack": "node scripts/prepare-builtin-pack.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

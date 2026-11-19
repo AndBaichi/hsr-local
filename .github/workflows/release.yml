@@ -41,6 +41,9 @@ jobs:
       - name: Build datapack (installer resource)
         run: npm run datapack:full
 
+      - name: Prepare builtin datapack
+        run: npm run builtin:pack
+
       - name: Check signing key
         shell: pwsh
         env:
