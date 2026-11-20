@@ -67,7 +67,15 @@
     "dataVersion": "数据版本",
     "dataVersionLive": "4.7（现场）",
     "dataVersionMid": "4.7.51",
-    "dataVersionLatest": "4.7.52（最新）"
+    "dataVersionLatest": "4.7.52（最新）",
+    "dataVersionChoose": "选择数据版本",
+    "dataVersionHintLive": "现场",
+    "dataVersionHintMid": "历史",
+    "dataVersionHintLatest": "最新",
+    "dataVersionDescLive": "只显示 4.7 已上线内容",
+    "dataVersionDescMid": "显示数据包全量（历史标签）",
+    "dataVersionDescLatest": "显示 4.7.52 全量数据",
+    "dataVersionFootnote": "现场视图会隐藏 4.7 之后新增的角色、光锥与物品。"
   },
   "home": {
     "title": "资料总览",

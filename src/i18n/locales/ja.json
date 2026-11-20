@@ -67,7 +67,15 @@
     "dataVersion": "データ版",
     "dataVersionLive": "4.7（ライブ）",
     "dataVersionMid": "4.7.51",
-    "dataVersionLatest": "4.7.52（最新）"
+    "dataVersionLatest": "4.7.52（最新）",
+    "dataVersionChoose": "データ版を選択",
+    "dataVersionHintLive": "ライブ",
+    "dataVersionHintMid": "過去",
+    "dataVersionHintLatest": "最新",
+    "dataVersionDescLive": "4.7 で実装済みの内容のみ",
+    "dataVersionDescMid": "データパック全量（過去ラベル）",
+    "dataVersionDescLatest": "4.7.52 の全量データ",
+    "dataVersionFootnote": "ライブ表示では 4.7 以降に追加された内容を隠します。"
   },
   "home": {
     "title": "概要",

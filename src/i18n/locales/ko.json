@@ -67,7 +67,15 @@
     "dataVersion": "데이터 버전",
     "dataVersionLive": "4.7(라이브)",
     "dataVersionMid": "4.7.51",
-    "dataVersionLatest": "4.7.52(최신)"
+    "dataVersionLatest": "4.7.52(최신)",
+    "dataVersionChoose": "데이터 버전 선택",
+    "dataVersionHintLive": "라이브",
+    "dataVersionHintMid": "이전",
+    "dataVersionHintLatest": "최신",
+    "dataVersionDescLive": "4.7 정식 콘텐츠만",
+    "dataVersionDescMid": "데이터팩 전체(이전 라벨)",
+    "dataVersionDescLatest": "4.7.52 전체 데이터",
+    "dataVersionFootnote": "라이브 보기에서는 4.7 이후 추가된 콘텐츠를 숨깁니다."
   },
   "home": {
     "title": "개요",

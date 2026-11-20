@@ -14,8 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import { DataVersionPicker } from '@/components/layout/DataVersionPicker';
 import { toggleWindowMaximize, WindowControls } from '@/components/layout/WindowControls';
-import { DATA_VIEW_OPTIONS, useDataViewStore } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 /**
@@ -39,8 +39,6 @@ export function TopBar(): ReactNode {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const shortcutsEnabled = useSettingsStore((state) => state.prefs.shortcutsEnabled);
-  const dataVersion = useDataViewStore((state) => state.version);
-  const setDataVersion = useDataViewStore((state) => state.setVersion);
 
   // 全局快捷键：Ctrl/Cmd+K 直达搜索；纯 `/` 且焦点不在输入控件时同样直达。
   // 受 prefs.shortcutsEnabled 门控；关闭时连 preventDefault 都不做。
@@ -82,29 +80,7 @@ export function TopBar(): ReactNode {
         <Breadcrumb />
       </div>
 
-      <label className="flex items-center pr-2">
-        <span className="sr-only">{t('common.dataVersion')}</span>
-        <select
-          value={dataVersion}
-          onChange={(event) => {
-            setDataVersion(event.target.value as (typeof DATA_VIEW_OPTIONS)[number]);
-          }}
-          aria-label={t('common.dataVersion') as string}
-          className="min-h-8 rounded-control border border-line bg-panelSoft px-2 text-xs text-ink outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent"
-        >
-          {DATA_VIEW_OPTIONS.map((version) => (
-            <option key={version} value={version}>
-              {t(
-                version === 'live'
-                  ? 'common.dataVersionLive'
-                  : version === '4.7.51'
-                    ? 'common.dataVersionMid'
-                    : 'common.dataVersionLatest',
-              )}
-            </option>
-          ))}
-        </select>
-      </label>
+      <DataVersionPicker />
 
       <WindowControls />
     </header>

@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.4` 的 `hsr-local_4.8.4_x64-setup.exe` |
-| 体积 | **86,258,072 B**（82.26 MiB），2026-11-20 22:15（4.8.4 构建） |
-| SHA-256 | `6e1da8f814c6948e7ed8bc8830a4726667a18b0d82e2d6b8b0b99469657f3f96` |
+| 安装包（发布资产） | Release `v4.8.5` 的 `hsr-local_4.8.5_x64-setup.exe` |
+| 体积 | **86,258,068 B**（82.26 MiB），2026-11-20 22:34（4.8.5 构建） |
+| SHA-256 | `ff51a43e1975c83b0f8203e7207708ad2d7887a445af7aa9a0c4d7fff7e18d2f` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.8.4）
+## 7. 客户端更新（v2.27，应用版本 4.8.5）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.4_x64-setup.exe`，86,258,072 B（82.26 MiB），
-  SHA-256 `6e1da8f814c6948e7ed8bc8830a4726667a18b0d82e2d6b8b0b99469657f3f96`
+- 当前安装包：`hsr-local_4.8.5_x64-setup.exe`，86,258,068 B（82.26 MiB），
+  SHA-256 `ff51a43e1975c83b0f8203e7207708ad2d7887a445af7aa9a0c4d7fff7e18d2f`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.4`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.8.5`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -813,3 +813,10 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 列表、搜索、首页「新增角色/光锥」、更新日志都走同一份过滤；切到 `4.7.51` / `4.7.52` 显示全量。
 - 页面标题的版本徽标跟随选择：现场视图显示 `4.7`，最新视图显示 `4.7.52`。
 - 货币战争「角色图鉴」的赛季筛选默认落在**第 2 赛季**（第 1 赛季内容游戏内已移除）；用户手动切到「全部」后不会被重置。
+### 7.16 数据版本选择器重绘（v2.29 / 4.8.5）
+
+- 原生 `<select>` 换成自绘的 `DataVersionPicker`：
+  - 顶栏胶囊按钮：状态点 + `4.7` + `现场` + 展开箭头；
+  - 下拉面板沿用 `hsr-panel` / 圆角 / 描边 / `accent` 高亮，带版本说明与选中勾。
+- 支持点外部关闭、`Esc` 关闭；选项仍是 `4.7（现场）` / `4.7.51` / `4.7.52（最新）`。
+- 行为不变：默认现场，选择写 `localStorage`，切换后列表/搜索/首页/更新日志同步过滤。

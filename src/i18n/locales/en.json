@@ -67,7 +67,15 @@
     "dataVersion": "Data version",
     "dataVersionLive": "4.7 (live)",
     "dataVersionMid": "4.7.51",
-    "dataVersionLatest": "4.7.52 (latest)"
+    "dataVersionLatest": "4.7.52 (latest)",
+    "dataVersionChoose": "Choose data version",
+    "dataVersionHintLive": "Live",
+    "dataVersionHintMid": "Previous",
+    "dataVersionHintLatest": "Latest",
+    "dataVersionDescLive": "Only content released in 4.7",
+    "dataVersionDescMid": "Full datapack (historical label)",
+    "dataVersionDescLatest": "Full 4.7.52 data",
+    "dataVersionFootnote": "Live view hides characters, lightcones and items added after 4.7."
   },
   "home": {
     "title": "Overview",
