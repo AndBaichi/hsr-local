@@ -102,8 +102,7 @@
     "bannerLightcone": "Light Cone Event Warp",
     "bannerEnds": "Ends",
     "bannerDaysLeft": "{{days}}d left",
-    "bannerEndsToday": "Ends today",
-    "bannerSource": "Source: PROJECT-HLITH (community, unofficial)"
+    "bannerEndsToday": "Ends today"
   },
   "placeholder": {
     "badge": "Batch T01 · Shell ready",

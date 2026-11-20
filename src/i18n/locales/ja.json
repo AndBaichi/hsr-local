@@ -102,8 +102,7 @@
     "bannerLightcone": "光円錐躍遷",
     "bannerEnds": "終了",
     "bannerDaysLeft": "残り {{days}} 日",
-    "bannerEndsToday": "本日終了",
-    "bannerSource": "出典：PROJECT-HLITH（コミュニティ、非公式）"
+    "bannerEndsToday": "本日終了"
   },
   "placeholder": {
     "badge": "バッチ T01 · 骨組み完成",

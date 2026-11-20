@@ -102,8 +102,7 @@
     "bannerLightcone": "光锥活动跃迁",
     "bannerEnds": "结束",
     "bannerDaysLeft": "剩余 {{days}} 天",
-    "bannerEndsToday": "今天结束",
-    "bannerSource": "数据来源：PROJECT-HLITH（社区整理，非官方）"
+    "bannerEndsToday": "今天结束"
   },
   "placeholder": {
     "badge": "批次 T01 · 骨架已就绪",

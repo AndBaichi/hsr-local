@@ -1,26 +1,18 @@
 /**
  * 首页「当前跃迁」卡片。
  *
- * 数据源是社区 Project HLITH 的 banners.json（每天从官方公告/米游社/wiki 汇总）。
+ * 数据源是社区 PROJECT-HLITH 的 banners.json（每天从官方公告/米游社/wiki 汇总）。
  * 只展示当前正在 UP 的卡池，不展示未来排期；离线时用上次缓存，没有就整块隐藏。
  */
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import AutoAwesomeOutlined from '@mui/icons-material/AutoAwesomeOutlined';
-import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
-
 import { SafeImage } from '@/components/common/SafeImage';
+import { loadActiveBanners, type ActiveBanner } from '@/lib/data/banners';
 import { dal } from '@/lib/data/dal';
-import {
-  BANNERS_SOURCE_PAGE,
-  loadActiveBanners,
-  type ActiveBanner,
-} from '@/lib/data/banners';
 import { localizedName } from '@/lib/format';
-import { openExternal } from '@/lib/openExternal';
 import { useSettingsStore } from '@/stores/settings';
 
 /** 本地化日期：MM-DD HH:mm */
@@ -43,13 +35,11 @@ function BannerCard({ banner, now }: { readonly banner: ActiveBanner; readonly n
     days <= 0 ? (t('home.bannerEndsToday') as string) : (t('home.bannerDaysLeft', { days }) as string);
 
   return (
-    <div className="hsr-panel flex min-w-0 flex-col gap-3 rounded-card border border-line p-4">
+    <div className="hsr-panel flex min-w-0 flex-col gap-3 rounded-card border border-line bg-panel p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <span className="inline-flex items-center gap-1 rounded-tag border border-[color:var(--hsr-accent-line)] bg-[color:var(--hsr-accent-soft)] px-1.5 py-[1px] text-[10px] font-medium text-accent">
-            {banner.kind === 'character'
-              ? t('home.bannerCharacter')
-              : t('home.bannerLightcone')}
+            {banner.kind === 'character' ? t('home.bannerCharacter') : t('home.bannerLightcone')}
           </span>
           <div className="mt-1 truncate text-xs text-dim" title={banner.title}>
             {banner.title}
@@ -100,39 +90,27 @@ function BannerCard({ banner, now }: { readonly banner: ActiveBanner; readonly n
 export function CurrentBanners(): ReactNode {
   const { t } = useTranslation();
   const [banners, setBanners] = useState<readonly ActiveBanner[] | undefined>(undefined);
-  const now = useMemo(() => Date.now(), []);
+  // 当前时间在挂载时取一次（放在 effect 里，保持渲染纯函数）
+  const [now, setNow] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     let alive = true;
-    void loadActiveBanners(now).then((rows) => {
+    const current = Date.now();
+    setNow(current);
+    void loadActiveBanners(current).then((rows) => {
       if (alive) setBanners(rows);
     });
     return () => {
       alive = false;
     };
-  }, [now]);
+  }, []);
 
-  if (banners === undefined || banners.length === 0) return null;
+  if (now === undefined || banners === undefined || banners.length === 0) return null;
 
   return (
     <section className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
-          <AutoAwesomeOutlined sx={{ fontSize: 16 }} className="text-accent" />
-          {t('home.currentBanners')}
-        </h2>
-        <button
-          type="button"
-          onClick={() => {
-            void openExternal(BANNERS_SOURCE_PAGE);
-          }}
-          className="inline-flex shrink-0 items-center gap-1 text-[10px] text-dim transition-colors hover:text-accent"
-          title={t('home.bannerSource') as string}
-        >
-          {t('home.bannerSource')}
-          <OpenInNewOutlined sx={{ fontSize: 11 }} />
-        </button>
-      </div>
+      {/* 纯文字标题，不加图标/底色 */}
+      <h2 className="text-sm font-semibold text-accent">{t('home.currentBanners')}</h2>
 
       <div className="grid gap-3 lg:grid-cols-2">
         {banners.map((banner) => (

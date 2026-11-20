@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.7` 的 `hsr-local_4.8.7_x64-setup.exe` |
-| 体积 | **86,258,072 B**（82.26 MiB），2026-11-20 23:07（4.8.7 构建） |
-| SHA-256 | `1321f9077f429f48b228062f5e3c59b8c796e73d8270ace88723a4e048d8cd11` |
+| 安装包（发布资产） | Release `v4.8.8` 的 `hsr-local_4.8.8_x64-setup.exe` |
+| 体积 | **86,258,072 B**（82.26 MiB），2026-11-20 23:42（4.8.8 构建） |
+| SHA-256 | `d15b9ea5dd52c100145ce05d6b7890a4bb76af493ce3b0d352fd7419f39d44b5` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.8.7）
+## 7. 客户端更新（v2.27，应用版本 4.8.8）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.7_x64-setup.exe`，86,258,072 B（82.26 MiB），
-  SHA-256 `1321f9077f429f48b228062f5e3c59b8c796e73d8270ace88723a4e048d8cd11`
+- 当前安装包：`hsr-local_4.8.8_x64-setup.exe`，86,258,072 B（82.26 MiB），
+  SHA-256 `d15b9ea5dd52c100145ce05d6b7890a4bb76af493ce3b0d352fd7419f39d44b5`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.7`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.8.8`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -828,7 +828,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   `https://raw.githubusercontent.com/HymnToHimeros/PROJECT-HLITH/main/src/games/hsr/data/banners.json`
 - 只展示 `start <= now < end` 且非 permanent 的卡池；未来排期不展示，避免爆料争议。
 - 结果缓存 6 小时；离线时用上次成功缓存，没有就隐藏整块，不影响其它页面。
-- 标注「社区整理，非官方」，并提供来源链接；角色/光锥名称与图标仍来自本地数据包。
+- 界面不展示来源按钮/图标；来源只记录在 README / PRD 中。角色/光锥名称与图标仍来自本地数据包。
 ### 7.18 空的新增角色/光锥区域直接隐藏（v2.31 / 4.8.7）
 
 - 首页「新增角色 / 新增光锥」只有确实有内容时才渲染：
@@ -836,3 +836,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   - 只有一边有内容 → 只渲染那一边，单栏宽度；
   - 加载中仍显示骨架，避免布局跳动。
 - 实测当前数据（4.7 现场、4.7.51→4.7.52 无新增可展示项）首页不再出现「新增角色 / 新增光锥」。
+### 7.19 当前跃迁标题收尾（v2.32 / 4.8.8）
+
+- 「当前跃迁」区块去掉右上角「数据来源」按钮；
+- 标题前不再放星星图标，改为**纯文字标题**；
+- 标题用主题 accent 色（`text-accent`），在深色背景上清晰，不加底色/胶囊、不加符号。
