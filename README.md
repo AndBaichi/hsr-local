@@ -641,7 +641,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 |---|---|
 | 安装包（发布资产） | Release `v4.8.8` 的 `hsr-local_4.8.8_x64-setup.exe` |
 | 体积 | **86,258,072 B**（82.26 MiB），2026-11-20 23:42（4.8.8 构建） |
-| SHA-256 | `d15b9ea5dd52c100145ce05d6b7890a4bb76af493ce3b0d352fd7419f39d44b5` |
+| SHA-256 | `eefbe6f20476f0c0e338c24a8e4a908f6c09bbf975acbbc000358494cd0aeb59` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -724,7 +724,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
 - 当前安装包：`hsr-local_4.8.8_x64-setup.exe`，86,258,072 B（82.26 MiB），
-  SHA-256 `d15b9ea5dd52c100145ce05d6b7890a4bb76af493ce3b0d352fd7419f39d44b5`
+  SHA-256 `eefbe6f20476f0c0e338c24a8e4a908f6c09bbf975acbbc000358494cd0aeb59`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -840,4 +840,4 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 - 「当前跃迁」区块去掉右上角「数据来源」按钮；
 - 标题前不再放星星图标，改为**纯文字标题**；
-- 标题用主题 accent 色（`text-accent`），在深色背景上清晰，不加底色/胶囊、不加符号。
+- 标题与其它区块标题一致，使用 `text-ink` 白色；不加底色/胶囊、不加符号。

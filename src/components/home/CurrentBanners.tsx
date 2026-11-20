@@ -110,7 +110,7 @@ export function CurrentBanners(): ReactNode {
   return (
     <section className="flex flex-col gap-3">
       {/* 纯文字标题，不加图标/底色 */}
-      <h2 className="text-sm font-semibold text-accent">{t('home.currentBanners')}</h2>
+      <h2 className="text-sm font-semibold text-ink">{t('home.currentBanners')}</h2>
 
       <div className="grid gap-3 lg:grid-cols-2">
         {banners.map((banner) => (
