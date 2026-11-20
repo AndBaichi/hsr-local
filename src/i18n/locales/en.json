@@ -96,7 +96,14 @@
       "desc": "Click the favorite button on a detail page to pin it here."
     },
     "viewAll": "View all",
-    "dataReady": "Data pack ready — all content is available offline"
+    "dataReady": "Data pack ready — all content is available offline",
+    "currentBanners": "Current Warps",
+    "bannerCharacter": "Character Event Warp",
+    "bannerLightcone": "Light Cone Event Warp",
+    "bannerEnds": "Ends",
+    "bannerDaysLeft": "{{days}}d left",
+    "bannerEndsToday": "Ends today",
+    "bannerSource": "Source: PROJECT-HLITH (community, unofficial)"
   },
   "placeholder": {
     "badge": "Batch T01 · Shell ready",

@@ -17,7 +17,10 @@
 import { openUrl } from '@tauri-apps/plugin-opener';
 
 /** 允许打开的前缀（米游社星穹铁道文章页） */
-const ALLOWED_PREFIXES: readonly string[] = ['https://www.miyoushe.com/sr/'];
+const ALLOWED_PREFIXES: readonly string[] = [
+  'https://www.miyoushe.com/sr/',
+  'https://github.com/HymnToHimeros/PROJECT-HLITH',
+];
 
 /** 是否运行在 Tauri 容器里（与 `lib/data/dal.ts` 的判定方式一致） */
 function isTauri(): boolean {

@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.5` 的 `hsr-local_4.8.5_x64-setup.exe` |
-| 体积 | **86,258,068 B**（82.26 MiB），2026-11-20 22:34（4.8.5 构建） |
-| SHA-256 | `ff51a43e1975c83b0f8203e7207708ad2d7887a445af7aa9a0c4d7fff7e18d2f` |
+| 安装包（发布资产） | Release `v4.8.6` 的 `hsr-local_4.8.6_x64-setup.exe` |
+| 体积 | **86,258,072 B**（82.26 MiB），2026-11-20 22:57（4.8.6 构建） |
+| SHA-256 | `77eab56f1eab914d21f6f771d942267aef4cb61ade7c8669bdef3737d52b2cee` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -652,12 +652,12 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > ① `bundle.windows.webviewInstallMode = { type: "downloadBootstrapper", silent: true }`
 > ——仅当目标机器**没有** WebView2 Runtime 时，首次安装需要联网取运行时；Win11 与已更新的 Win10
 > 通常自带。**游戏数据部分完全离线**：所有数据 / 图片来自内嵌的 75.9 MB pack，运行期不访问原站；
-> 运行期联网点：数据包更新检查、应用更新检查、首页「公告 / 资讯」；游戏数据本身全部来自内嵌 pack，断网仍可正常浏览。
+> 运行期联网点：数据包更新检查、应用更新检查、首页「公告 / 资讯」、首页「当前跃迁」；游戏数据本身全部来自内嵌 pack，断网仍可正常浏览。
 > ② `installer.nsi:694` 会把 `selftest.exe`（约 558 KB 的独立自检程序）一并打进安装包，
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.8.5）
+## 7. 客户端更新（v2.27，应用版本 4.8.6）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.5_x64-setup.exe`，86,258,068 B（82.26 MiB），
-  SHA-256 `ff51a43e1975c83b0f8203e7207708ad2d7887a445af7aa9a0c4d7fff7e18d2f`
+- 当前安装包：`hsr-local_4.8.6_x64-setup.exe`，86,258,072 B（82.26 MiB），
+  SHA-256 `77eab56f1eab914d21f6f771d942267aef4cb61ade7c8669bdef3737d52b2cee`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.5`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.8.6`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -820,3 +820,12 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   - 下拉面板沿用 `hsr-panel` / 圆角 / 描边 / `accent` 高亮，带版本说明与选中勾。
 - 支持点外部关闭、`Esc` 关闭；选项仍是 `4.7（现场）` / `4.7.51` / `4.7.52（最新）`。
 - 行为不变：默认现场，选择写 `localStorage`，切换后列表/搜索/首页/更新日志同步过滤。
+### 7.17 首页当前跃迁（v2.30 / 4.8.6）
+
+- 首页新增「当前跃迁」区块，显示**当前正在 UP**的角色/光锥活动跃迁与剩余天数。
+- 官方没有开放卡池 API；数据源为社区 [PROJECT-HLITH](https://github.com/HymnToHimeros/PROJECT-HLITH) 的
+  `src/games/hsr/data/banners.json`（每天从官方公告 / 米游社 / wiki 汇总）：
+  `https://raw.githubusercontent.com/HymnToHimeros/PROJECT-HLITH/main/src/games/hsr/data/banners.json`
+- 只展示 `start <= now < end` 且非 permanent 的卡池；未来排期不展示，避免爆料争议。
+- 结果缓存 6 小时；离线时用上次成功缓存，没有就隐藏整块，不影响其它页面。
+- 标注「社区整理，非官方」，并提供来源链接；角色/光锥名称与图标仍来自本地数据包。

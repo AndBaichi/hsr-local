@@ -96,7 +96,14 @@
       "desc": "상세 페이지에서 즐겨찾기 버튼을 누르면 여기에 고정됩니다."
     },
     "viewAll": "전체 보기",
-    "dataReady": "데이터 팩 준비 완료, 모든 콘텐츠를 오프라인으로 이용할 수 있습니다"
+    "dataReady": "데이터 팩 준비 완료, 모든 콘텐츠를 오프라인으로 이용할 수 있습니다",
+    "currentBanners": "현재 워프",
+    "bannerCharacter": "캐릭터 이벤트 워프",
+    "bannerLightcone": "광추 이벤트 워프",
+    "bannerEnds": "종료",
+    "bannerDaysLeft": "{{days}}일 남음",
+    "bannerEndsToday": "오늘 종료",
+    "bannerSource": "출처: PROJECT-HLITH(커뮤니티, 비공식)"
   },
   "placeholder": {
     "badge": "배치 T01 · 골격 완료",

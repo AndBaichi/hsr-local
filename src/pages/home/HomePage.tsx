@@ -33,6 +33,7 @@ import { SafeImage } from '@/components/common/SafeImage';
 import { SkeletonBlock } from '@/components/common/SkeletonBlock';
 import { RarityStars } from '@/components/common/EntityGrid';
 import { NewsCard } from '@/components/home/NewsCard';
+import { CurrentBanners } from '@/components/home/CurrentBanners';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { dal } from '@/lib/data/dal';
 import { compareVersions } from '@/lib/update/manifest';
@@ -357,6 +358,8 @@ export default function HomePage(): ReactNode {
           />
         </div>
       )}
+
+      <CurrentBanners />
 
       {/* 公告 / 资讯（米游社实时拉取；米游社只有简中内容，非中文界面不渲染） */}
       {showNews ? (
