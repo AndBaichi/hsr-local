@@ -225,7 +225,9 @@
     "appInstalling": "설치 중입니다. 앱이 자동으로 종료되고 다시 시작됩니다…",
     "appReady": "설치 완료. 앱을 다시 시작하면 적용됩니다.",
     "appRestart": "앱 다시 시작",
-    "appError": "앱 업데이트 실패: {{message}}"
+    "appError": "앱 업데이트 실패: {{message}}",
+    "dataVersion": "데이터 버전",
+    "dataVersionDesc": "표시할 데이터 버전을 선택합니다. 4.7 라이브는 4.7 이후 추가된 콘텐츠를 숨깁니다."
   },
   "closePrompt": {
     "title": "창 닫기",

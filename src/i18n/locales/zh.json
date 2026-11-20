@@ -225,7 +225,9 @@
     "appInstalling": "正在安装，应用会自动退出并重启…",
     "appReady": "安装完成，重启应用后生效",
     "appRestart": "重启应用",
-    "appError": "应用更新失败：{{message}}"
+    "appError": "应用更新失败：{{message}}",
+    "dataVersion": "数据版本",
+    "dataVersionDesc": "选择要展示的数据版本；4.7 现场会隐藏 4.7 之后新增的内容。"
   },
   "closePrompt": {
     "title": "关闭窗口",

@@ -28,6 +28,7 @@ import { LANGUAGE_ORDER, type Lang } from '@/i18n';
 import { useFavoritesStore } from '@/stores/favorites';
 import { useNotesStore } from '@/stores/notes';
 import { useSettingsStore } from '@/stores/settings';
+import { DATA_VIEW_OPTIONS, useDataViewStore } from '@/stores/dataView';
 import { useUpdaterStore } from '@/stores/updater';
 import { useAppUpdaterStore } from '@/stores/appUpdater';
 
@@ -152,6 +153,8 @@ function ConfirmBar({
 export default function SettingsPage(): ReactNode {
   const { t } = useTranslation();
   const prefs = useSettingsStore((state) => state.prefs);
+  const dataVersion = useDataViewStore((state) => state.version);
+  const setDataVersion = useDataViewStore((state) => state.setVersion);
   const setLang = useSettingsStore((state) => state.setLang);
   const setShortcutsEnabled = useSettingsStore((state) => state.setShortcutsEnabled);
   const setCloseAction = useSettingsStore((state) => state.setCloseAction);
@@ -321,7 +324,29 @@ export default function SettingsPage(): ReactNode {
         </div>
       </Section>
 
-      {/* 2. 数据包：信息 + 更新 / 回滚 / 手动导入（v4.8） */}
+      {/* 2. 数据版本：现场 / 历史 / 最新 */}
+      <Section title={t('settings.dataVersion') as string} description={t('settings.dataVersionDesc') as string}>
+        <div className="flex flex-wrap gap-2">
+          {DATA_VIEW_OPTIONS.map((option) => (
+            <ChoiceButton
+              key={option}
+              active={dataVersion === option}
+              label={
+                t(
+                  option === 'live'
+                    ? 'common.dataVersionLive'
+                    : option === '4.7.51'
+                      ? 'common.dataVersionMid'
+                      : 'common.dataVersionLatest',
+                ) as string
+              }
+              onClick={() => setDataVersion(option)}
+            />
+          ))}
+        </div>
+      </Section>
+
+      {/* 3. 数据包：信息 + 更新 / 回滚 / 手动导入（v4.8） */}
       <Section title={t('settings.datapack') as string} description={t('settings.datapackDesc') as string}>
         <div className="flex flex-col gap-2">
           <InfoRow

@@ -14,7 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
-import { DataVersionPicker } from '@/components/layout/DataVersionPicker';
 import { toggleWindowMaximize, WindowControls } from '@/components/layout/WindowControls';
 import { useSettingsStore } from '@/stores/settings';
 
@@ -79,8 +78,6 @@ export function TopBar(): ReactNode {
       <div className="flex min-w-0 flex-1 items-center" data-tauri-drag-region>
         <Breadcrumb />
       </div>
-
-      <DataVersionPicker />
 
       <WindowControls />
     </header>

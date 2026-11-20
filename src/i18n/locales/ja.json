@@ -225,7 +225,9 @@
     "appInstalling": "インストール中。アプリは自動的に終了して再起動します…",
     "appReady": "インストール完了。再起動で反映されます。",
     "appRestart": "アプリを再起動",
-    "appError": "アプリ更新に失敗しました：{{message}}"
+    "appError": "アプリ更新に失敗しました：{{message}}",
+    "dataVersion": "データ版",
+    "dataVersionDesc": "表示するデータ版を選択します。4.7 ライブでは 4.7 以降に追加された内容を隠します。"
   },
   "closePrompt": {
     "title": "ウィンドウを閉じる",

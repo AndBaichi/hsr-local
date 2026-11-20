@@ -225,7 +225,9 @@
     "appInstalling": "Installing; the app will exit and restart automatically…",
     "appReady": "Installed. Restart the app to apply.",
     "appRestart": "Restart app",
-    "appError": "App update failed: {{message}}"
+    "appError": "App update failed: {{message}}",
+    "dataVersion": "Data version",
+    "dataVersionDesc": "Choose which data version to display; Live 4.7 hides content added after 4.7."
   },
   "closePrompt": {
     "title": "Close window",
