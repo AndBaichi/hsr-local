@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.8.9` 的 `hsr-local_4.8.9_x64-setup.exe` |
-| 体积 | **86,258,072 B**（82.26 MiB），2026-11-21 01:22（4.8.9 构建） |
-| SHA-256 | `47595fa0fa2d3b6117a7bb3fd36c70ff477d1e8d787b62406f4c532e1899018e` |
+| 安装包（发布资产） | Release `v4.9.0` 的 `hsr-local_4.9.0_x64-setup.exe` |
+| 体积 | **86,261,656 B**（82.26 MiB），2026-11-21 02:00（4.9.0 构建） |
+| SHA-256 | `f4e6351ca67400880e4b9cc77329c6aad9d4b486b2a6a95b67d623a757f3e409` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.8.9）
+## 7. 客户端更新（v2.27，应用版本 4.9.0）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.8.9_x64-setup.exe`，86,258,072 B（82.26 MiB），
-  SHA-256 `47595fa0fa2d3b6117a7bb3fd36c70ff477d1e8d787b62406f4c532e1899018e`
+- 当前安装包：`hsr-local_4.9.0_x64-setup.exe`，86,261,656 B（82.26 MiB），
+  SHA-256 `f4e6351ca67400880e4b9cc77329c6aad9d4b486b2a6a95b67d623a757f3e409`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.8.9`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.9.0`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -850,16 +850,13 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   - `4.7.52（最新）`
 - 行为不变：选择写 `localStorage`，列表/搜索/首页/更新日志按 live 过滤。
 
-### 8.1 米游社互动地图可行性（调研，未接入）
+### 8.1 米游社互动地图（v2.34 / 4.9.0）
 
-- 官方地图是公开 Web 应用，数据 API 无需登录、CORS `*`：
-  - `https://api-static.mihoyo.com/common/srmap/sr_map/v1/map/tree?map_id=...&app_sn=sr_map&lang=zh-cn`
-  - `/map/info`（每张地图的背景图切片、origin、total_size、padding）
-  - `/map/point/list`、`/map/point_group`、`/map/label/tree`
-  - `/map/get_guide`、`/map/get_public_notice`
-- 每张地图背景是 1 张（少数多张）PNG，实测单张 0.19–1.63MB；
-- 地图树实测 **657 个叶子地图**，全量离线图片约 **300–400MB**，不适合直接塞进安装包。
-- 可行路线：
-  1. **在线内嵌**：新增「地图」页，用 iframe/Tauri WebView 加载官方地图，开发量最小，但依赖网络；
-  2. **本地按图缓存**：自定义地图查看器，首次打开某张图时缓存背景图 + 点位到 `%APPDATA%`，之后离线可用；
-  3. **全量离线**：单独做一个地图资源包（另一个下载项），不放进主安装包。
+- 工具分组新增「互动地图」，默认打开基座舱段（map 39），完整官方链接的 hash 参数原样保留。
+- 为了移除官方页面的「更新日志」弹窗和右下角「扫码下载米游社 App」浮层：
+  - 用本地壳 `public/sr/app/interactive-map/index.html` 提供 HTML；
+  - `<base>` 指向 `https://webstatic.mihoyo.com/sr/app/interactive-map/`，JS/CSS 仍从官方加载；
+  - 壳在官方 bundle 启动前写入 `localStorage['async-announcement-hidden-ts']`，官方认为更新日志已读；
+  - CSS 直接隐藏 `.bbs-qr` 二维码浮层。
+- 地图点位/背景图仍由官方接口实时加载，所以**需要联网**；页面只做在线内嵌，不在主安装包里塞 657 张地图（全量约 300–400MB）。
+- 如果以后要做离线，按图缓存或单独地图包仍可另开。

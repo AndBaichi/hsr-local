@@ -16,6 +16,7 @@ import BugReportOutlined from '@mui/icons-material/BugReportOutlined';
 import CompareArrowsOutlined from '@mui/icons-material/CompareArrowsOutlined';
 import DiamondOutlined from '@mui/icons-material/DiamondOutlined';
 import EditNoteOutlined from '@mui/icons-material/EditNoteOutlined';
+import MapOutlined from '@mui/icons-material/MapOutlined';
 import EmojiEventsOutlined from '@mui/icons-material/EmojiEventsOutlined';
 import ExpandMoreOutlined from '@mui/icons-material/ExpandMoreOutlined';
 import HomeOutlined from '@mui/icons-material/HomeOutlined';
@@ -72,6 +73,7 @@ interface NavItemDefinition {
     | 'nav.endgame'
     | 'nav.currency'
     | 'nav.compare'
+    | 'nav.map'
     | 'nav.favorites'
     | 'nav.notes'
     | 'nav.settings';
@@ -161,6 +163,7 @@ const CURRENCY_SUB_ITEMS: readonly NavSubItem[] = CURRENCY_KINDS.map((kind) => (
 
 /** 工具分组 */
 const TOOL_ITEMS: readonly NavItemDefinition[] = [
+  { to: '/map', labelKey: 'nav.map', icon: MapOutlined },
   { to: '/compare', labelKey: 'nav.compare', icon: CompareArrowsOutlined },
   { to: '/favorites', labelKey: 'nav.favorites', icon: StarBorderOutlined },
   { to: '/notes', labelKey: 'nav.notes', icon: EditNoteOutlined },

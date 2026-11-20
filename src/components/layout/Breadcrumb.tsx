@@ -25,6 +25,7 @@ type CrumbLabelKey =
   | 'nav.items'
   | 'nav.achievements'
   | 'nav.compare'
+  | 'nav.map'
   | 'nav.favorites'
   | 'nav.notes'
   | 'nav.settings'
@@ -42,6 +43,7 @@ const SEGMENT_LABELS: Readonly<Record<string, CrumbLabelKey>> = {
   monsters: 'nav.monsters',
   items: 'nav.items',
   achievements: 'nav.achievements',
+  map: 'nav.map',
   compare: 'nav.compare',
   favorites: 'nav.favorites',
   notes: 'nav.notes',

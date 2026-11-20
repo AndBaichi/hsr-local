@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+    <meta name="renderer" content="webkit" />
+    <meta name="force-rendering" content="webkit" />
+    <title>「崩坏：星穹铁道」地图</title>
+    <!--
+      本地壳：HTML 由 app 提供，脚本/样式仍从官方 webstatic 加载。
+      这样 origin 是 tauri.localhost，可以在官方 bundle 启动前写 localStorage，
+      让官方“更新日志”弹窗认为已经看过，从而不再弹出。
+    -->
+    <base href="https://webstatic.mihoyo.com/sr/app/interactive-map/" />
+    <script src="https://webstatic.mihoyo.com/dora/biz/mihoyo-analysis/v2/main.js"></script>
+    <script src="https://webstatic.mihoyo.com/dora/biz/mihoyo-account-sdk/main.js"></script>
+    <script src="https://webstatic.mihoyo.com/dora/biz/mihoyo-community-init/main.js"></script>
+    <link rel="stylesheet" href="./1_f9dde3754d3a70de1de7.css" />
+    <link rel="stylesheet" href="./bundle_2ce78df6fbae3e52e9e3.css" />`n    <style>.bbs-qr{display:none !important}</style>
+    <script>
+      try {
+        // 官方更新日志用这个 key 判断是否已读；写入当前时间即可跳过弹窗。
+        localStorage.setItem('async-announcement-hidden-ts', String(Date.now()));
+      } catch (error) {
+        // localStorage 不可用时忽略
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="./vendors_47a0fad7f647defd75a6.js"></script>
+    <script src="./bundle_3b1c002885ddc9702ca6.js"></script>
+    <script>
+      // 官方地图右下角会挂一个“扫码下载米游社 APP”的二维码浮层，隐藏掉。
+      (function () {
+        var hideQr = function () {
+          var nodes = document.querySelectorAll('body *');
+          for (var i = 0; i < nodes.length; i += 1) {
+            var node = nodes[i];
+            if (node.children.length > 0) continue;
+            var text = (node.textContent || '').replace(/\s+/g, '');
+            if (/扫码下载米游社\s*app/i.test(text)) {
+              var target = node;
+              while (target.parentElement && target.parentElement !== document.body) {
+                var style = getComputedStyle(target);
+                if (style.position === 'fixed' || style.position === 'absolute') break;
+                target = target.parentElement;
+              }
+              target.style.display = 'none';
+            }
+          }
+        };
+        hideQr();
+        var observer = new MutationObserver(hideQr);
+        observer.observe(document.body, { childList: true, subtree: true });
+        setTimeout(hideQr, 1500);
+        setTimeout(hideQr, 4000);
+      })();
+    </script>
+  </body>
+</html>

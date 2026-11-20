@@ -24,7 +24,8 @@
     "changelog": "Changelog",
     "endgame": "Endgame",
     "currency": "Currency Wars",
-    "home2": "Overview"
+    "home2": "Overview",
+    "map": "Interactive Map"
   },
   "topbar": {
     "search": "Search",
@@ -629,5 +630,8 @@
     "banner": "Data pack {{version}} is available",
     "go": "Update",
     "dismiss": "Dismiss"
+  },
+  "map": {
+    "subtitle": "Official Miyoushe map (online)"
   }
 }

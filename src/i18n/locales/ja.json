@@ -24,7 +24,8 @@
     "changelog": "更新履歴",
     "endgame": "終局コンテンツ",
     "currency": "通貨戦争",
-    "home2": "概要"
+    "home2": "概要",
+    "map": "インタラクティブマップ"
   },
   "topbar": {
     "search": "検索",
@@ -629,5 +630,8 @@
     "banner": "データパック {{version}} が利用可能です",
     "go": "更新する",
     "dismiss": "無視"
+  },
+  "map": {
+    "subtitle": "米遊社公式マップ（オンライン）"
   }
 }

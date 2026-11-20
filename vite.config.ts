@@ -41,7 +41,7 @@ export default defineConfig({
     // WebView2 Evergreen 的内核版本远高于此，固定 target 可避免多余的降级转译
     target: 'chrome110',
     // 数据包不进 web bundle：它作为 Tauri resource / 静态资源存在（架构文档 §1.3）
-    copyPublicDir: false,
+    copyPublicDir: true,
     sourcemap: Boolean(process.env.TAURI_ENV_DEBUG),
     chunkSizeWarningLimit: 1500,
   },

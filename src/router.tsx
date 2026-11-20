@@ -50,6 +50,7 @@ const SearchPage = lazy(() => import('@/pages/search/SearchPage'));
 const FavoritesPage = lazy(() => import('@/pages/favorites/FavoritesPage'));
 const NotesPage = lazy(() => import('@/pages/notes/NotesPage'));
 const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
+const MapPage = lazy(() => import('@/pages/map/MapPage'));
 
 // 新增栏目（更新日志 / 终局内容 / 货币战争）；后两个详情页由并行 worker 创建
 const ChangelogPage = lazy(() => import('@/pages/changelog/ChangelogPage'));
@@ -131,6 +132,8 @@ export const appRoutes: RouteObject[] = [
       { path: 'items/:id', element: page(<ItemDetailPage />) },
 
       { path: 'achievements', element: page(<AchievementsPage />) },
+
+      { path: 'map', element: page(<MapPage />) },
 
       { path: 'compare', element: page(<ComparePage />) },
       { path: 'search', element: page(<SearchPage />) },

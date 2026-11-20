@@ -24,7 +24,8 @@
     "changelog": "업데이트 로그",
     "endgame": "종말 콘텐츠",
     "currency": "화폐 전쟁",
-    "home2": "개요"
+    "home2": "개요",
+    "map": "인터랙티브 맵"
   },
   "topbar": {
     "search": "검색",
@@ -629,5 +630,8 @@
     "banner": "데이터 팩 {{version}}을(를) 사용할 수 있습니다",
     "go": "업데이트",
     "dismiss": "무시"
+  },
+  "map": {
+    "subtitle": "미유샤 공식 지도(온라인)"
   }
 }

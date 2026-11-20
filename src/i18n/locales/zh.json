@@ -24,7 +24,8 @@
     "changelog": "更新日志",
     "endgame": "高难内容",
     "currency": "货币战争",
-    "home2": "总览"
+    "home2": "总览",
+    "map": "互动地图"
   },
   "topbar": {
     "search": "搜索",
@@ -629,5 +630,8 @@
     "banner": "数据包 {{version}} 可用",
     "go": "去更新",
     "dismiss": "忽略"
+  },
+  "map": {
+    "subtitle": "米游社官方地图（在线）"
   }
 }
