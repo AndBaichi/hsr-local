@@ -1,6 +1,6 @@
 [package]
 name = "hsr-local"
-version = "4.8.3"
+version = "4.8.4"
 license = "MIT"
 description = "星穹数据库 · 本地版 —— 完全离线的崩坏：星穹铁道本地资料库"
 authors = ["HSR Local"]

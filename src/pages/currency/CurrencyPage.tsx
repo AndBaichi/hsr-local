@@ -496,6 +496,13 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
   const navKey = CURRENCY_KINDS.find((entry) => entry.key === kind)?.navKey ?? 'currencyRole';
   const title = t(`currency.${navKey}` as 'currency.currencyRole') as string;
 
+  // 角色图鉴默认落在第 2 赛季：第 1 赛季内容已从游戏内移除，一般用不上。
+  // 只在“还没选过赛季”时补默认值；用户手动切到“全部”后不会被重置。
+  useEffect(() => {
+    if (kind !== 'role' || entries === undefined) return;
+    if (filters.season !== undefined) return;
+    setFilter('season', '2');
+  }, [kind, entries, filters.season, setFilter]);
   /**
    * 本图鉴的筛选维度。
    *
@@ -513,7 +520,7 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
         label: t('currency.season') as string,
         valuesOf: (entry) => [String(roleSeasonOf(String(entry.id)))],
         labelOf: (value) => t('currency.seasonValue', { season: value }) as string,
-        // 新赛季在前：原站默认就落在最高赛季
+        // 新赛季在前；默认落在第 2 赛季（第 1 赛季内容游戏内已移除）
         compare: (left, right) => Number(right) - Number(left),
       });
     }

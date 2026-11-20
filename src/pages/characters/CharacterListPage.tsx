@@ -12,11 +12,13 @@ import { dal } from '@/lib/data/dal';
 import type { CharacterBrief } from '@/lib/data/types';
 import { localizedName } from '@/lib/format';
 import { elementName, pathName } from '@/lib/labels';
+import { useDataVersionLabel } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 export default function CharacterListPage(): ReactNode {
   const { t } = useTranslation();
   const lang = useSettingsStore((state) => state.prefs.lang);
+  const dataVersionLabel = useDataVersionLabel();
   const { query, setQuery, filters, setFilter, resetKey } = useListState('characters');
   const all = dal.getIndex('character');
 
@@ -65,7 +67,7 @@ export default function CharacterListPage(): ReactNode {
         title={t('nav.characters')}
         count={all.length}
         countLabel={t('common.count', { count: all.length })}
-        badge={dal.meta?.gameVersion}
+        badge={dataVersionLabel}
       />
       <FilterBar
         query={query}

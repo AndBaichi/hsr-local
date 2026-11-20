@@ -17,11 +17,13 @@ import { dal } from '@/lib/data/dal';
 import type { MonsterBrief } from '@/lib/data/types';
 import { localizedName } from '@/lib/format';
 import { elementName, monsterRankName } from '@/lib/labels';
+import { useDataVersionLabel } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 export default function MonsterListPage(): ReactNode {
   const { t } = useTranslation();
   const lang = useSettingsStore((state) => state.prefs.lang);
+  const dataVersionLabel = useDataVersionLabel();
   const { query, setQuery, filters, setFilter, resetKey } = useListState('monsters');
   const all = dal.getIndex('monster');
 
@@ -61,7 +63,7 @@ export default function MonsterListPage(): ReactNode {
         title={t('nav.monsters')}
         count={all.length}
         countLabel={t('common.count', { count: all.length })}
-        badge={dal.meta?.gameVersion}
+        badge={dataVersionLabel}
       />
       <FilterBar
         query={query}

@@ -15,6 +15,7 @@ import { SideNav } from '@/components/layout/SideNav';
 import { TopBar } from '@/components/layout/TopBar';
 import { AppUpdateBanner } from '@/components/layout/AppUpdateBanner';
 import { UpdateBanner } from '@/components/layout/UpdateBanner';
+import { useDataViewStore } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 import { useUpdaterStore } from '@/stores/updater';
 import { useAppUpdaterStore } from '@/stores/appUpdater';
@@ -35,6 +36,7 @@ function isNarrowWindow(): boolean {
 
 /** 应用外壳 */
 export function AppShell(): ReactNode {
+  const dataVersion = useDataViewStore((state) => state.version);
   const sidebarCollapsed = useSettingsStore((state) => state.prefs.sidebarCollapsed);
   const setSidebarCollapsed = useSettingsStore((state) => state.setSidebarCollapsed);
 
@@ -85,7 +87,7 @@ export function AppShell(): ReactNode {
         <UpdateBanner />
 
         <main className="hsr-backdrop min-h-0 flex-1 overflow-y-auto">
-          <div className="hsr-content-width py-6">
+          <div key={dataVersion} className="hsr-content-width py-6">
             <Outlet />
           </div>
         </main>

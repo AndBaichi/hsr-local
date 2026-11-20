@@ -16,11 +16,13 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { DataAccessError } from '@/lib/data/errors';
 import { dal } from '@/lib/data/dal';
 import type { AchievementSeriesDetail } from '@/lib/data/types';
+import { useDataVersionLabel } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 export default function AchievementsPage(): ReactNode {
   const { t } = useTranslation();
   const lang = useSettingsStore((state) => state.prefs.lang);
+  const dataVersionLabel = useDataVersionLabel();
   const [series, setSeries] = useState<readonly AchievementSeriesDetail[] | undefined>(undefined);
   const [error, setError] = useState<DataAccessError | undefined>(undefined);
   const [openId, setOpenId] = useState<string | undefined>(undefined);
@@ -74,7 +76,7 @@ export default function AchievementsPage(): ReactNode {
         description={t('detail.achievements') as string}
         count={total}
         countLabel={t('common.count', { count: total }) as string}
-        badge={dal.meta?.gameVersion}
+        badge={dataVersionLabel}
       />
 
       <input

@@ -16,11 +16,13 @@ import { dal } from '@/lib/data/dal';
 import type { ItemBrief } from '@/lib/data/types';
 import { localizedName } from '@/lib/format';
 import { itemTypeName } from '@/lib/labels';
+import { useDataVersionLabel } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 export default function ItemListPage(): ReactNode {
   const { t } = useTranslation();
   const lang = useSettingsStore((state) => state.prefs.lang);
+  const dataVersionLabel = useDataVersionLabel();
   const { query, setQuery, filters, setFilter, resetKey } = useListState('items');
   const all = dal.getIndex('item');
 
@@ -67,7 +69,7 @@ export default function ItemListPage(): ReactNode {
         title={t('nav.items')}
         count={all.length}
         countLabel={t('common.count', { count: all.length })}
-        badge={dal.meta?.gameVersion}
+        badge={dataVersionLabel}
       />
       <FilterBar
         query={query}

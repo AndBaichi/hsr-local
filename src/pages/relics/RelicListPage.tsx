@@ -10,11 +10,13 @@ import { useListState, matchesQuery } from '@/hooks/useListState';
 import { dal } from '@/lib/data/dal';
 import type { RelicSetBrief } from '@/lib/data/types';
 import { localizedName } from '@/lib/format';
+import { useDataVersionLabel } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 export default function RelicListPage(): ReactNode {
   const { t } = useTranslation();
   const lang = useSettingsStore((state) => state.prefs.lang);
+  const dataVersionLabel = useDataVersionLabel();
   const { query, setQuery, filters, setFilter, resetKey } = useListState('relics');
   const all = dal.getIndex('relicset');
 
@@ -53,7 +55,7 @@ export default function RelicListPage(): ReactNode {
         title={t('nav.relics')}
         count={all.length}
         countLabel={t('common.count', { count: all.length })}
-        badge={dal.meta?.gameVersion}
+        badge={dataVersionLabel}
       />
       <FilterBar
         query={query}

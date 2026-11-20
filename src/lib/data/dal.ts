@@ -25,7 +25,10 @@ import { convertFileSrc, invoke } from '@tauri-apps/api/core';
 
 import type { Lang } from '@/i18n';
 
+import { isLiveView } from '@/stores/dataView';
+
 import { DataAccessError } from './errors';
+import { isExcludedFromLive, type LiveFilterKind } from './liveView';
 import type {
   AchievementSeriesDetail,
   CharacterDetail,
@@ -363,17 +366,28 @@ class DatapackDal implements DataAccessLayer {
 
   getIndex<K extends IndexModuleKey>(module: K): ModuleIndexMap[K] {
     const bundle = this.requireBundle();
+    const live = isLiveView();
+    /** 4.7 现场视图：按 live 排除表过滤；其余模块原样返回 */
+    const apply = <T extends { readonly id?: string; readonly groupKey?: string }>(
+      kind: LiveFilterKind,
+      rows: readonly T[],
+    ): readonly T[] =>
+      live
+        ? rows.filter(
+            (row) => !isExcludedFromLive(kind, String(row.id ?? row.groupKey ?? '')),
+          )
+        : rows;
     switch (module) {
       case 'character':
-        return bundle.characters as ModuleIndexMap[K];
+        return apply('character', bundle.characters) as ModuleIndexMap[K];
       case 'lightcone':
-        return bundle.lightcones as ModuleIndexMap[K];
+        return apply('lightcone', bundle.lightcones) as ModuleIndexMap[K];
       case 'relicset':
         return bundle.relicsets as ModuleIndexMap[K];
       case 'monster':
-        return bundle.monsters as ModuleIndexMap[K];
+        return apply('monster', bundle.monsters) as ModuleIndexMap[K];
       case 'item':
-        return bundle.items as ModuleIndexMap[K];
+        return apply('item', bundle.items) as ModuleIndexMap[K];
       case 'achievementSeries':
         return bundle.achievementSeries as ModuleIndexMap[K];
       default: {

@@ -43,6 +43,8 @@ import { elementName, pathName } from '@/lib/labels';
 import { useNewsFeeds } from '@/lib/news/useNewsFeeds';
 import { pickName } from '@/lib/userdata/types';
 import { sortedFavorites, useFavoritesStore } from '@/stores/favorites';
+import { isExcludedFromLive } from '@/lib/data/liveView';
+import { useDataVersionLabel, useDataViewStore } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 import { useUpdaterStore } from '@/stores/updater';
 
@@ -312,11 +314,19 @@ export default function HomePage(): ReactNode {
   }, [lang]);
 
   const bootInfo = dal.bootInfo;
-  const versionBadge =
-    bootInfo === undefined ? undefined : `${t('common.version')} ${bootInfo.gameVersion}`;
+  const dataVersionLabel = useDataVersionLabel();
+  const versionBadge = `${t('common.version')} ${dataVersionLabel}`;
 
   // 首页「最新数据版本」优先用远端 manifest 看到的版本：
   // 数据包还没更新时，diff.toVersion 仍是旧版本，不能代表“最新”。
+  const dataVersion = useDataViewStore((state) => state.version);
+  const live = dataVersion === 'live';
+  const visibleCharacters = live
+    ? newItems.characters.filter((entry) => !isExcludedFromLive('character', entry.id))
+    : newItems.characters;
+  const visibleLightcones = live
+    ? newItems.lightcones.filter((entry) => !isExcludedFromLive('lightcone', entry.id))
+    : newItems.lightcones;
   const latestKnownVersion = useUpdaterStore((state) => state.latestVersion);
   const latestCandidates = [newItems.toVersion, latestKnownVersion, bootInfo?.gameVersion].filter(
     (value): value is string => typeof value === 'string' && value !== '',
@@ -374,9 +384,9 @@ export default function HomePage(): ReactNode {
           <SectionTitle title={t('home.newCharacters')} viewAllTo="/characters" />
           {newItems.loading ? (
             <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
-          ) : newItems.characters.length > 0 ? (
+          ) : visibleCharacters.length > 0 ? (
             <div className="grid grid-cols-2 gap-3">
-              {newItems.characters.map((character) => (
+              {visibleCharacters.map((character) => (
                 <NewCharacterCard key={character.id} character={character} />
               ))}
             </div>
@@ -389,9 +399,9 @@ export default function HomePage(): ReactNode {
           <SectionTitle title={t('home.newLightcones')} viewAllTo="/lightcones" />
           {newItems.loading ? (
             <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
-          ) : newItems.lightcones.length > 0 ? (
+          ) : visibleLightcones.length > 0 ? (
             <div className="grid grid-cols-2 gap-3">
-              {newItems.lightcones.map((lightcone) => (
+              {visibleLightcones.map((lightcone) => (
                 <NewLightconeCard key={lightcone.id} lightcone={lightcone} />
               ))}
             </div>

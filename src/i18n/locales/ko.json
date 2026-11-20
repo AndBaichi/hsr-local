@@ -63,7 +63,11 @@
     "open": "열기",
     "yes": "확인",
     "no": "취소",
-    "module": "모듈"
+    "module": "모듈",
+    "dataVersion": "데이터 버전",
+    "dataVersionLive": "4.7(라이브)",
+    "dataVersionMid": "4.7.51",
+    "dataVersionLatest": "4.7.52(최신)"
   },
   "home": {
     "title": "개요",

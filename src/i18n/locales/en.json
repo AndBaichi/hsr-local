@@ -63,7 +63,11 @@
     "open": "Open",
     "yes": "Confirm",
     "no": "Cancel",
-    "module": "Module"
+    "module": "Module",
+    "dataVersion": "Data version",
+    "dataVersionLive": "4.7 (live)",
+    "dataVersionMid": "4.7.51",
+    "dataVersionLatest": "4.7.52 (latest)"
   },
   "home": {
     "title": "Overview",

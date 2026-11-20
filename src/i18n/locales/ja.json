@@ -63,7 +63,11 @@
     "open": "開く",
     "yes": "確定",
     "no": "キャンセル",
-    "module": "モジュール"
+    "module": "モジュール",
+    "dataVersion": "データ版",
+    "dataVersionLive": "4.7（ライブ）",
+    "dataVersionMid": "4.7.51",
+    "dataVersionLatest": "4.7.52（最新）"
   },
   "home": {
     "title": "概要",

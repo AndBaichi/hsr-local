@@ -63,7 +63,11 @@
     "open": "打开",
     "yes": "确定",
     "no": "取消",
-    "module": "模块"
+    "module": "模块",
+    "dataVersion": "数据版本",
+    "dataVersionLive": "4.7（现场）",
+    "dataVersionMid": "4.7.51",
+    "dataVersionLatest": "4.7.52（最新）"
   },
   "home": {
     "title": "资料总览",

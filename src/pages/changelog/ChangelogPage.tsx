@@ -14,6 +14,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { useListState } from '@/hooks/useListState';
 import { DataAccessError } from '@/lib/data/errors';
 import { getDiffBundle, visibleDiffItems, type DiffBundle, type DiffItem } from '@/lib/data/extra';
+import { isExcludedFromLive } from '@/lib/data/liveView';
+import { useDataViewStore } from '@/stores/dataView';
 import { useSettingsStore } from '@/stores/settings';
 
 type EntityFilter = 'all' | DiffItem['entity'];
@@ -48,7 +50,17 @@ export default function ChangelogPage(): ReactNode {
     };
   }, [lang]);
 
-  const items = useMemo(() => (bundle ? visibleDiffItems(bundle) : []), [bundle]);
+  const dataVersion = useDataViewStore((state) => state.version);
+  const items = useMemo(() => {
+    if (!bundle) return [];
+    const all = visibleDiffItems(bundle);
+    if (dataVersion !== 'live') return all;
+    return all.filter((item) => {
+      if (item.entity === 'character') return !isExcludedFromLive('character', item.id);
+      if (item.entity === 'lightcone') return !isExcludedFromLive('lightcone', item.id);
+      return true;
+    });
+  }, [bundle, dataVersion]);
   const shown = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase();
     return items.filter((item) => {
