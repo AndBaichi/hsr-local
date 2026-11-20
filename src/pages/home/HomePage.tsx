@@ -381,38 +381,41 @@ export default function HomePage(): ReactNode {
         </div>
       ) : null}
 
-      {/* 新增角色 / 新增光锥（双栏） */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section className="flex flex-col gap-3">
-          <SectionTitle title={t('home.newCharacters')} viewAllTo="/characters" />
-          {newItems.loading ? (
-            <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
-          ) : visibleCharacters.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
-              {visibleCharacters.map((character) => (
-                <NewCharacterCard key={character.id} character={character} />
-              ))}
-            </div>
-          ) : (
-            <EmptyHint title={t('home.newCharacters')} description={t('home.dataReady')} />
-          )}
-        </section>
+      {/* 新增角色 / 新增光锥：只有确实有新增内容时才显示；两边都空就整块删掉 */}
+      {newItems.loading ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
+          <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
+        </div>
+      ) : visibleCharacters.length > 0 || visibleLightcones.length > 0 ? (
+        <div
+          className={`grid gap-6 ${
+            visibleCharacters.length > 0 && visibleLightcones.length > 0 ? 'lg:grid-cols-2' : ''
+          }`}
+        >
+          {visibleCharacters.length > 0 ? (
+            <section className="flex flex-col gap-3">
+              <SectionTitle title={t('home.newCharacters')} viewAllTo="/characters" />
+              <div className="grid grid-cols-2 gap-3">
+                {visibleCharacters.map((character) => (
+                  <NewCharacterCard key={character.id} character={character} />
+                ))}
+              </div>
+            </section>
+          ) : null}
 
-        <section className="flex flex-col gap-3">
-          <SectionTitle title={t('home.newLightcones')} viewAllTo="/lightcones" />
-          {newItems.loading ? (
-            <SkeletonBlock lines={2} titleHeight={160} lineHeight={160} />
-          ) : visibleLightcones.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3">
-              {visibleLightcones.map((lightcone) => (
-                <NewLightconeCard key={lightcone.id} lightcone={lightcone} />
-              ))}
-            </div>
-          ) : (
-            <EmptyHint title={t('home.newLightcones')} description={t('home.dataReady')} />
-          )}
-        </section>
-      </div>
+          {visibleLightcones.length > 0 ? (
+            <section className="flex flex-col gap-3">
+              <SectionTitle title={t('home.newLightcones')} viewAllTo="/lightcones" />
+              <div className="grid grid-cols-2 gap-3">
+                {visibleLightcones.map((lightcone) => (
+                  <NewLightconeCard key={lightcone.id} lightcone={lightcone} />
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </div>
+      ) : null}
 
       {/* 收藏速览 */}
       <section className="hsr-panel flex flex-col gap-3 p-5">
