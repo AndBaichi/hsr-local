@@ -31,6 +31,7 @@ import { TraitCard } from '@/components/currency/TraitCard';
 import { ErrorState } from '@/components/common/ErrorState';
 import { FilterBar, PagedGrid, type FilterDef } from '@/components/common/ListControls';
 import { MacroText } from '@/components/common/MacroText';
+import { dal } from '@/lib/data/dal';
 import { openEntityContextMenu } from '@/components/common/ContextMenu';
 import { SafeImage } from '@/components/common/SafeImage';
 import { SkeletonCardGrid } from '@/components/common/SkeletonBlock';
@@ -51,6 +52,7 @@ import {
 import { matchesQuery, useListState } from '@/hooks/useListState';
 import { currencyFieldName } from '@/lib/labels';
 import type { LocalizedNames, ModuleKey } from '@/lib/data/types';
+import { localizedName } from '@/lib/format';
 import { alphabetIndexFor, sortByIndex } from '@/lib/text/indexLetter';
 import { useRatingsStore } from '@/stores/ratings';
 import { useSettingsStore } from '@/stores/settings';
@@ -344,7 +346,9 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
   const [traitEntries, setTraitEntries] = useState<readonly CurrencyEntry[]>([]);
   //  - 主角光环描述里的 `<gridfightinfo type=item id=…>` 要解析成物品名
   const [itemEntries, setItemEntries] = useState<readonly CurrencyEntry[]>([]);
-  const needsRoles = kind === 'trait' || kind === 'spotlight';
+  // 除角色图鉴自身外，投资策略/装备/增益/羁绊/光环的描述都可能用
+  // <gridfightinfo type=role> 引用角色，需要提前加载角色表。
+  const needsRoles = kind !== 'role';
   const needsTraits = kind === 'spotlight';
   const needsItems = kind !== 'role';
   // 本图鉴是否已经评过任何一条：评过就不再提示"点徽标可评级"，提示只在首次出现
@@ -455,9 +459,12 @@ function CodexView({ kind }: { readonly kind: CurrencyKind }): ReactNode {
   const roleLabelOf = useCallback(
     (id: string): string => {
       const role = roleById.get(id);
-      return role === undefined ? id : currencyDisplayName(role, 'role', t);
+      if (role !== undefined) return currencyDisplayName(role, 'role', t);
+      // 货币战争角色表里查不到时，退回角色图鉴索引（例如 1210 / 1503 / 1224）。
+      const character = dal.getIndex('character').find((entry) => entry.id === id);
+      return character === undefined ? id : localizedName(character.names, lang, id);
     },
-    [roleById, t],
+    [lang, roleById, t],
   );
 
   // 物品 id → 显示名（`<gridfightinfo type=item>` 用）

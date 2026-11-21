@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.9.1` 的 `hsr-local_4.9.1_x64-setup.exe` |
-| 体积 | **86,262,168 B**（82.26 MiB），2026-11-21 12:59（4.9.1 构建） |
-| SHA-256 | `e13793b8cc85f6789ca48669d85918c0de225c2573409b7280db4d3ab4a50b4b` |
+| 安装包（发布资产） | Release `v4.9.2` 的 `hsr-local_4.9.2_x64-setup.exe` |
+| 体积 | **86,261,656 B**（82.26 MiB），2026-11-21 13:12（4.9.2 构建） |
+| SHA-256 | `abce7100e4c1f77797267e4b64896b4403e2ec424a80b5ad9e49a2c9ff4181b8` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.9.1）
+## 7. 客户端更新（v2.27，应用版本 4.9.2）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.9.1_x64-setup.exe`，86,262,168 B（82.26 MiB），
-  SHA-256 `e13793b8cc85f6789ca48669d85918c0de225c2573409b7280db4d3ab4a50b4b`
+- 当前安装包：`hsr-local_4.9.2_x64-setup.exe`，86,261,656 B（82.26 MiB），
+  SHA-256 `abce7100e4c1f77797267e4b64896b4403e2ec424a80b5ad9e49a2c9ff4181b8`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.9.1`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.9.2`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -860,3 +860,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   - CSS 直接隐藏 `.bbs-qr` 二维码浮层。
 - 地图点位/背景图仍由官方接口实时加载，所以**需要联网**；页面只做在线内嵌，不在主安装包里塞 657 张地图（全量约 300–400MB）。\n- 切换地图时的「参数错误 / 空图」：官方路由会拼出 `#/map/0#/map/38?center=旧坐标`，父页面监听并取第二个 `#`，去掉旧 center/shown_types 后重载目标地图。\n- 地图位置用**模块变量**记忆：切到别的栏目再回来停留上次选择；重新打开软件才回到默认 map 39。
 - 如果以后要做离线，按图缓存或单独地图包仍可另开。
+### 7.21 投资策略图鉴的角色引用（v2.36 / 4.9.2）
+
+- 投资策略描述里的 `<gridfightinfo type=role>` 之前没有加载角色表，解析失败后回退成角色 id，显示成 `【1501】` 这类数字串。
+- 修复：所有非角色图鉴（投资策略 / 装备 / 增益 / 羁绊 / 光环）都预加载 `currency/role.json`；货币战争角色表查不到时再回退角色图鉴索引（如 1210 / 1503 / 1224）。
+- 实测投资策略页 `【数字串】` 计数从几十条降到 **0**；`幻月游戏星徽` 正常显示「火花 / 高周波电锯」。
