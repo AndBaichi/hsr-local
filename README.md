@@ -639,9 +639,9 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 | 项 | 值 |
 |---|---|
-| 安装包（发布资产） | Release `v4.9.0` 的 `hsr-local_4.9.0_x64-setup.exe` |
-| 体积 | **86,261,656 B**（82.26 MiB），2026-11-21 02:00（4.9.0 构建） |
-| SHA-256 | `f4e6351ca67400880e4b9cc77329c6aad9d4b486b2a6a95b67d623a757f3e409` |
+| 安装包（发布资产） | Release `v4.9.1` 的 `hsr-local_4.9.1_x64-setup.exe` |
+| 体积 | **86,262,168 B**（82.26 MiB），2026-11-21 12:59（4.9.1 构建） |
+| SHA-256 | `e13793b8cc85f6789ca48669d85918c0de225c2573409b7280db4d3ab4a50b4b` |
 | 格式 | 合法 PE（`MZ`），含 `Nullsoft` / `NSIS` 标志 |
 | 主程序 | `src-tauri/target/release/hsr-local.exe`，7,100,928 B |
 | 内嵌数据包 | 4.7.52 / 78,089,856 B / **7360** 条目 / `manifest.json` 为 zip 首条目，SHA-256 `7b154e966a025f90d7dccf74c4b781116ea19222c87c608c061da0bca6b9dc63` |
@@ -657,7 +657,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 > 因为 Tauri NSIS 默认打包全部 `[[bin]]` 目标。它无害、不影响 App 运行；
 > 按用户「先不要删东西」要求**保留**，未删除任何文件。
 
-## 7. 客户端更新（v2.27，应用版本 4.9.0）
+## 7. 客户端更新（v2.27，应用版本 4.9.1）
 
 从 v2.18 起，数据包可以脱离安装包更新，朋友不需要每次重装整个软件。
 
@@ -723,8 +723,8 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 - 错误 sha256：拒绝且 active 不变；
 - 启动清理：2 个孤儿目录（测试包 + 旧完整包）被删除，只留内置包。
 - 回归：typecheck 0 错、vitest **115 passed**。
-- 当前安装包：`hsr-local_4.9.0_x64-setup.exe`，86,261,656 B（82.26 MiB），
-  SHA-256 `f4e6351ca67400880e4b9cc77329c6aad9d4b486b2a6a95b67d623a757f3e409`
+- 当前安装包：`hsr-local_4.9.1_x64-setup.exe`，86,262,168 B（82.26 MiB），
+  SHA-256 `e13793b8cc85f6789ca48669d85918c0de225c2573409b7280db4d3ab4a50b4b`
   （2026-11-19 05:48 构建，含本节的客户端更新）。
 
 ### 7.6 主角光环卡片内容补全（v2.19）
@@ -764,7 +764,7 @@ CARGO_INCREMENTAL=0 npm run tauri:build
 
 ### 7.10 版本与分支
 
-- 应用版本：`4.9.0`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
+- 应用版本：`4.9.1`（`package.json` / `tauri.conf.json` / `Cargo.toml` 同步）。
 - 数据版本：当前 `4.7.52`（4.8.3 起**直接内置**；由 `scripts/lib/consts.mjs` 的 `HSR_VERSION` 控制，CI 自动探测）。
 - 数据包更新不会改应用版本；程序更新走 Tauri Updater，两者互不覆盖。
 ### 7.11 数据 4.7.52（v2.24）
@@ -858,5 +858,5 @@ CARGO_INCREMENTAL=0 npm run tauri:build
   - `<base>` 指向 `https://webstatic.mihoyo.com/sr/app/interactive-map/`，JS/CSS 仍从官方加载；
   - 壳在官方 bundle 启动前写入 `localStorage['async-announcement-hidden-ts']`，官方认为更新日志已读；
   - CSS 直接隐藏 `.bbs-qr` 二维码浮层。
-- 地图点位/背景图仍由官方接口实时加载，所以**需要联网**；页面只做在线内嵌，不在主安装包里塞 657 张地图（全量约 300–400MB）。
+- 地图点位/背景图仍由官方接口实时加载，所以**需要联网**；页面只做在线内嵌，不在主安装包里塞 657 张地图（全量约 300–400MB）。\n- 切换地图时的「参数错误 / 空图」：官方路由会拼出 `#/map/0#/map/38?center=旧坐标`，父页面监听并取第二个 `#`，去掉旧 center/shown_types 后重载目标地图。\n- 地图位置用**模块变量**记忆：切到别的栏目再回来停留上次选择；重新打开软件才回到默认 map 39。
 - 如果以后要做离线，按图缓存或单独地图包仍可另开。
